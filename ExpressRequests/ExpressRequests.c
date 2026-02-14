@@ -64,3 +64,27 @@ static ExpressStatus init_response_fields(ExpressResponse *res) {
   res->statusCode = 0;
   return EXPRESS_OK;
 }
+
+static void free_response_fields_local(ExpressResponse *res) {
+  if (!res) return;
+  free(res->method);
+  free(res->url);
+  free(res->statusMessage);
+  if (res->headers) free_headers(res->headers);
+  free(res->body);
+  memset(res, 0, sizeof(*res));
+}
+
+static int send_all(int sockfd, const unsigned char *buf, size_t len) {
+  size_t off = 0;
+  while (off < len) {
+    ssize_t n = send(sockfd, buf + off, len - off, 0);
+    if (n < 0) {
+      if (errno == EINTR) continue;
+      return -1;
+    }
+    if (n == 0) return -1;
+    off += (size_t)n;
+  }
+  return 0;
+}
