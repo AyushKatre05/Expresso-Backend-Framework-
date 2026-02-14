@@ -238,3 +238,24 @@ ExpressStatus set_request_body(ExpressRequest *req, const char *body,
   req->bodyLength = length;
   return EXPRESS_OK;
 }
+ExpressStatus add_request_param(ExpressRequest *req, const char *key,
+                                const char *value) {
+  if (req->param == NULL) {
+    Params *new_header = (Params *)malloc(sizeof(Params));
+    new_header->key = strdup(key);
+    new_header->value = strdup(value);
+    new_header->next = NULL;
+    req->param = new_header;
+  } else {
+    Params *new_header = (Params *)malloc(sizeof(Params));
+    new_header->key = strdup(key);
+    new_header->value = strdup(value);
+    new_header->next = NULL;
+    Params *curr = req->param;
+    while (curr->next) {
+      curr = curr->next;
+    }
+    curr->next = new_header;
+  }
+  return EXPRESS_OK;
+}
