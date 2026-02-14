@@ -251,3 +251,12 @@ std::string extract_body(const char* buf, const size_t buf_len) {
   }
   return "";
 }
+bool write_file(const std::string& filepath, const std::string& content) {
+  std::ofstream file(filepath, std::ios::binary);
+  if (!file) {
+    return false;
+  }
+
+  file << content;
+  return file.good();
+}
