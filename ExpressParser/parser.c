@@ -273,3 +273,9 @@ static int ascii_strcasecmp(const char *a, const char *b) {
   return (int)(unsigned char)tolower((unsigned char)*a) -
          (int)(unsigned char)tolower((unsigned char)*b);
 }
+static int has_header(const ExpressHeader *h, const char *key) {
+  for (; h; h = h->next) {
+    if (h->key && ascii_strcasecmp(h->key, key) == 0) return 1;
+  }
+  return 0;
+}
