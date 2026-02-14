@@ -260,3 +260,13 @@ bool write_file(const std::string& filepath, const std::string& content) {
   file << content;
   return file.good();
 }
+std::string read_file(const std::string& filepath) {
+  std::ifstream file(filepath, std::ios::binary);
+  if (!file) {
+    return "";
+  }
+
+  std::ostringstream contents;
+  contents << file.rdbuf();
+  return contents.str();
+}
