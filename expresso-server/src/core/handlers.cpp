@@ -29,6 +29,39 @@ void handle_get(int client_fd, const std::string& route, const char* req, size_t
     return;
   }
 
+  if (!docs_directory().empty() && (route == "/docs" || (route.size() >= 6 && route.substr(0, 6) == "/docs/"))) {
+    std::string path = (route == "/docs" || route == "/docs/") ? "index.html" : route.substr(6);
+    if (path.empty()) path = "index.html";
+    if (path.find("..") != std::string::npos) {
+      if (close_requested) {
+        send_response(client_fd, "HTTP/1.1 404 Not Found\r\nConnection: close\r\n\r\n");
+      } else {
+        send_response(client_fd, RESP_404, RESP_404_LEN);
+      }
+      return;
+    }
+    std::string filepath = docs_directory() + "/" + path;
+    std::string file_contents = read_file(filepath);
+    std::ifstream check(filepath);
+    if (!check && file_contents.empty()) {
+      if (close_requested) {
+        send_response(client_fd, "HTTP/1.1 404 Not Found\r\nConnection: close\r\n\r\n");
+      } else {
+        send_response(client_fd, RESP_404, RESP_404_LEN);
+      }
+      return;
+    }
+    std::string content_type = "application/octet-stream";
+    if (path.size() >= 5 && path.compare(path.size() - 5, 5, ".html") == 0) content_type = "text/html; charset=utf-8";
+    else if (path.size() >= 4 && path.compare(path.size() - 4, 4, ".css") == 0) content_type = "text/css; charset=utf-8";
+    else if (path.size() >= 3 && path.compare(path.size() - 3, 3, ".js") == 0) content_type = "application/javascript; charset=utf-8";
+    std::string response = "HTTP/1.1 200 OK\r\nContent-Type: " + content_type + "\r\n";
+    if (close_requested) response += "Connection: close\r\n";
+    response += "Content-Length: " + std::to_string(file_contents.size()) + "\r\n\r\n" + file_contents;
+    send_response(client_fd, response);
+    return;
+  }
+
   if (route.size() > 6 && route.substr(0, 6) == "/echo/") {
     std::string response_body = route.substr(6, std::string::npos);
     std::string response = "HTTP/1.1 200 OK\r\nContent-Type: text/plain\r\n";
