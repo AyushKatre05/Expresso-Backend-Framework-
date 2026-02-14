@@ -54,3 +54,21 @@ ExpressStatus parse_http_request(char *raw_request, size_t length,
   free(req);
   return EXPRESS_OK;
 }
+ExpressStatus parse_request_line(const char *req_line, const size_t length,
+                                 HttpRequest *req) {
+  char *new_line = strndup(req_line, length);
+  char *line = strtok(new_line, " ");
+  if (strcmp(new_line, line) != 0)
+    return EXPRESS_PARSE_REQUEST_ERROR;
+  req->method = strdup(line);
+  line = strtok(NULL, " ");
+  if (line == NULL)
+    return EXPRESS_PARSE_REQUEST_ERROR;
+  req->url = strdup(line);
+  line = strtok(NULL, " ");
+  if (line == NULL)
+    return EXPRESS_PARSE_REQUEST_ERROR;
+  req->httpVersion = strdup(line);
+  free(new_line);
+  return EXPRESS_OK;
+}
