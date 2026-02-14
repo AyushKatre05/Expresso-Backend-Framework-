@@ -123,10 +123,22 @@ cmake --build .
 | Method | Path | Description |
 |--------|------|-------------|
 | GET | `/` | 200 OK |
+| GET | `/docs` | Documentation UI (if run with `--docs`) |
 | GET | `/echo/<text>` | Returns `<text>`, supports gzip |
 | GET | `/user-agent` | Returns `User-Agent` header |
 | GET | `/files/<name>` | Serves file from `--directory` |
 | POST | `/files/<name>` | Writes body to file under `--directory` |
+
+## Documentation
+
+The **documentation UI** explains how Expresso works behind the scenes, how to use it like Express, the API, and what to add next.
+
+- **In the browser (no server):** Open `docs/index.html` in your browser.
+- **Served by Expresso:** Run the server with `--docs` pointing at the `docs` folder:
+  ```bash
+  ./expresso-server --directory ./data --docs ./docs
+  ```
+  Then open **http://localhost:4221/docs** (or http://localhost/docs when behind Nginx in Docker).
 
 ## License
 
