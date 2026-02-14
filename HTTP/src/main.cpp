@@ -242,3 +242,12 @@ std::string extract_method(const char* buf, const size_t buf_len) {
   }
   return method;
 }
+std::string extract_body(const char* buf, const size_t buf_len) {
+  for (size_t i = 0; i + 3 < buf_len; ++ i) {
+    if (buf[i] == '\r' && buf[i + 1] == '\n' && buf[i + 2] == '\r' && buf[i + 3] == '\n') {
+      size_t body_start = i + 4;
+      return std::string(buf + body_start, buf_len - body_start);
+    }
+  }
+  return "";
+}
