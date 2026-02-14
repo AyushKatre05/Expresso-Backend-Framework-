@@ -83,3 +83,30 @@ void send_http_response(const int& client_fd, const char* buf, const size_t& len
     break; 
   }
 }
+void send_http_response(const int& client_fd, const std::string& buf) {
+  size_t sent = 0;
+  size_t lenght = buf.size();
+  
+  const char* data = buf.data();
+
+  while (sent < lenght) {
+    ssize_t cnt = ::send(client_fd, data + sent, lenght - sent, 0);
+    
+    if (cnt > 0) {
+      sent += static_cast<size_t>(cnt);
+      continue;
+    }
+
+    if (cnt == 0) {
+      std::cerr << "send() returned 0: conncetion may be closed\n";
+      break;
+    }
+    
+    if (errno == EINTR) {
+      continue;
+    }
+
+    std::cerr << "send() failed: (" << errno << ") " << std::strerror(errno) << "\n";
+    break; 
+  }
+}
