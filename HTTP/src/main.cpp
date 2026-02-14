@@ -270,3 +270,13 @@ std::string read_file(const std::string& filepath) {
   contents << file.rdbuf();
   return contents.str();
 }
+bool supports_gzip(const char* req, const size_t req_len) {
+  std::string accept_encoding = extract_header_value(req, req_len, "Accept-Encoding");
+  
+  return accept_encoding.find("gzip") != std::string::npos;
+}
+
+bool should_close_connection(const char* req, const size_t req_len) {
+  std::string connection = extract_header_value(req, req_len, "Connection");
+  return connection.find("close") != std::string::npos;
+}
