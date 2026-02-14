@@ -4,6 +4,7 @@
 #include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
+#include <ctype.h>
 
 ExpressStatus is_valid_method(const char *method) {
   const char *valid_methods[] = {"GET",   "POST", "PUT",     "DELETE",
@@ -258,4 +259,17 @@ ExpressStatus add_request_param(ExpressRequest *req, const char *key,
     curr->next = new_header;
   }
   return EXPRESS_OK;
+}
+
+static int ascii_strcasecmp(const char *a, const char *b) {
+  unsigned char ca, cb;
+  while (*a && *b) {
+    ca = (unsigned char)*a++;
+    cb = (unsigned char)*b++;
+    ca = (unsigned char)tolower(ca);
+    cb = (unsigned char)tolower(cb);
+    if (ca != cb) return (int)ca - (int)cb;
+  }
+  return (int)(unsigned char)tolower((unsigned char)*a) -
+         (int)(unsigned char)tolower((unsigned char)*b);
 }
