@@ -142,3 +142,60 @@ static int parse_url_host_port_path(const ExpressRequest *req,
   if (!*out_path) return -1;
   return 0;
 }
+
+static int decode_chunked(const unsigned char *in, size_t in_len,
+                          unsigned char **out, size_t *out_len) {
+  *out = NULL;
+  *out_len = 0;
+
+  size_t cap = 0;
+  unsigned char *buf = NULL;
+
+  size_t i = 0;
+  while (i < in_len) {
+    size_t line_start = i;
+    while (i + 1 < in_len && !(in[i] == '\r' && in[i + 1] == '\n')) i++;
+    if (i + 1 >= in_len) { free(buf); return -1; }
+
+    char tmp[64];
+    size_t line_len = i - line_start;
+    if (line_len >= sizeof(tmp)) { free(buf); return -1; }
+    memcpy(tmp, in + line_start, line_len);
+    tmp[line_len] = '\0';
+
+    char *semi = strchr(tmp, ';');
+    if (semi) *semi = '\0';
+
+    errno = 0;
+    unsigned long chunk_sz = strtoul(tmp, NULL, 16);
+    if (errno != 0) { free(buf); return -1; }
+
+    i += 2;
+
+    if (chunk_sz == 0) {
+      *out = buf ? buf : (unsigned char *)calloc(1, 1);
+      return (*out != NULL) ? 0 : -1;
+    }
+
+    if (i + chunk_sz + 2 > in_len) { free(buf); return -1; }
+
+    if (*out_len + (size_t)chunk_sz + 1 > cap) {
+      size_t newcap = cap ? cap : 1024;
+      while (newcap < *out_len + (size_t)chunk_sz + 1) newcap *= 2;
+      unsigned char *nb = (unsigned char *)realloc(buf, newcap);
+      if (!nb) { free(buf); return -1; }
+      buf = nb;
+      cap = newcap;
+    }
+
+    memcpy(buf + *out_len, in + i, (size_t)chunk_sz);
+    *out_len += (size_t)chunk_sz;
+    i += (size_t)chunk_sz;
+
+    if (!(in[i] == '\r' && in[i + 1] == '\n')) { free(buf); return -1; }
+    i += 2;
+  }
+
+  free(buf);
+  return -1;
+}
