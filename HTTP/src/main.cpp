@@ -210,3 +210,28 @@ std::string extract_route(const char* buf, const size_t buf_len) {
   
   return answer;
 }
+std::string extract_header_value(const char* buf, const size_t buf_len, const std::string& header_name) {
+  std::string search = header_name + ": ";
+  
+  for (size_t i = 0; i + search.size() < buf_len; ++i) {
+    bool match = true;
+    for (size_t j = 0; j < search.size(); ++j) {
+      if (std::tolower(buf[i + j]) != std::tolower(search[j])) {
+        match = false;
+        break;
+      }
+    }
+    
+    if (match) {
+      size_t start = i + search.size();
+      std::string value = "";
+      while (start < buf_len && buf[start] != '\r' && buf[start] != '\n') {
+        value += buf[start];
+        ++start;
+      }
+      return value;
+    }
+  }
+  
+  return "";
+}
