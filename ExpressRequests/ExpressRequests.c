@@ -199,3 +199,60 @@ static int decode_chunked(const unsigned char *in, size_t in_len,
   free(buf);
   return -1;
 }
+
+static ExpressStatus parse_status_line(const char *line, int *out_code, char **out_msg) {
+  if (!line || !out_code || !out_msg) return EXPRESS_PARSE_REQUEST_ERROR;
+
+  const char *sp1 = strchr(line, ' ');
+  if (!sp1) return EXPRESS_PARSE_REQUEST_ERROR;
+  const char *sp2 = strchr(sp1 + 1, ' ');
+  if (!sp2) return EXPRESS_PARSE_REQUEST_ERROR;
+
+  char codebuf[4] = {0};
+  size_t clen = (size_t)(sp2 - (sp1 + 1));
+  if (clen != 3) return EXPRESS_PARSE_REQUEST_ERROR;
+  memcpy(codebuf, sp1 + 1, 3);
+
+  char *endp = NULL;
+  long code = strtol(codebuf, &endp, 10);
+  if (!endp || *endp != '\0') return EXPRESS_PARSE_REQUEST_ERROR;
+
+  *out_code = (int)code;
+
+  const char *msg = sp2 + 1;
+  *out_msg = strdup(msg);
+  return (*out_msg != NULL) ? EXPRESS_OK : EXPRESS_PARSE_MEM_ERR;
+}
+
+static ExpressStatus parse_headers_block(const char *headers, size_t len, ExpressHeader **out) {
+  *out = NULL;
+
+  char *copy = (char *)malloc(len + 1);
+  if (!copy) return EXPRESS_PARSE_MEM_ERR;
+  memcpy(copy, headers, len);
+  copy[len] = '\0';
+
+  ExpressHeader *head = NULL;
+
+  char *save = NULL;
+  for (char *line = strtok_r(copy, "\r\n", &save); line; line = strtok_r(NULL, "\r\n", &save)) {
+    if (*line == '\0') continue;
+    char *colon = strchr(line, ':');
+    if (!colon) continue;
+
+    *colon = '\0';
+    char *key = line;
+    char *val = colon + 1;
+    while (*val == ' ' || *val == '\t') val++;
+
+    if (!append_header(&head, key, val)) {
+      free(copy);
+      if (head) free_headers(head);
+      return EXPRESS_PARSE_MEM_ERR;
+    }
+  }
+
+  free(copy);
+  *out = head;
+  return EXPRESS_OK;
+}
