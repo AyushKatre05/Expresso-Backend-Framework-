@@ -1,0 +1,38 @@
+version: "3.8"
+
+services:
+  expresso-server:
+    build:
+      context: .
+      dockerfile: Dockerfile
+    container_name: expresso-server
+    restart: unless-stopped
+    volumes:
+      - expresso-data:/data
+    expose:
+      - "4221"
+    healthcheck:
+      test: ["CMD", "wget", "-q", "--spider", "http://127.0.0.1:4221/"]
+      interval: 10s
+      timeout: 5s
+      retries: 3
+      start_period: 10s
+
+  nginx:
+    image: nginx:alpine
+    container_name: expresso-nginx
+    restart: unless-stopped
+    ports:
+      - "80:80"
+    volumes:
+      - ./nginx/nginx.conf:/etc/nginx/conf.d/default.conf:ro
+    depends_on:
+      expresso-server: { condition: service_healthy }
+    healthcheck:
+      test: ["CMD", "wget", "-q", "--spider", "http://127.0.0.1:80/"]
+      interval: 10s
+      timeout: 5s
+      retries: 3
+
+volumes:
+  expresso-data:
