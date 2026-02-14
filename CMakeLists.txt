@@ -1,41 +1,41 @@
-# Top-level: build HTTP server with optional Express parser (loosely coupled)
+# Expresso - HTTP backend with optional parser
 cmake_minimum_required(VERSION 3.13)
-project(ExpressoBackend LANGUAGES C CXX)
+project(Expresso LANGUAGES C CXX)
 
 set(CMAKE_C_STANDARD 11)
 set(CMAKE_CXX_STANDARD 23)
 
-# Express parser static library (C)
-set(EXPRESS_PARSER_SOURCES
-  ExpressParser/request_parse.c
-  ExpressParser/request_builder.c
-  ExpressParser/memory.c
+# Expresso parser static library (C)
+set(EXPRESSO_PARSER_SOURCES
+  expresso-parser/request_parse.c
+  expresso-parser/request_builder.c
+  expresso-parser/memory.c
 )
-add_library(express_parser STATIC ${EXPRESS_PARSER_SOURCES})
-target_include_directories(express_parser PUBLIC
-  ${CMAKE_CURRENT_SOURCE_DIR}/ExpressTypes
-  ${CMAKE_CURRENT_SOURCE_DIR}/ExpressParser
+add_library(expresso_parser STATIC ${EXPRESSO_PARSER_SOURCES})
+target_include_directories(expresso_parser PUBLIC
+  ${CMAKE_CURRENT_SOURCE_DIR}/expresso-types
+  ${CMAKE_CURRENT_SOURCE_DIR}/expresso-parser
 )
 
-# HTTP server (C++) - sources from subfolders: config, constants, io, utils, core
-file(GLOB_RECURSE HTTP_SOURCES HTTP/src/*.cpp HTTP/src/*.hpp)
-list(FILTER HTTP_SOURCES EXCLUDE REGEX ".*express/express_bridge\\.(cpp|hpp)$")
+# Expresso HTTP server (C++)
+file(GLOB_RECURSE EXPRESSO_SERVER_SOURCES expresso-server/src/*.cpp expresso-server/src/*.hpp)
+list(FILTER EXPRESSO_SERVER_SOURCES EXCLUDE REGEX ".*express/express_bridge\\.(cpp|hpp)$")
 
-add_executable(http-server ${HTTP_SOURCES})
-target_include_directories(http-server PRIVATE
-  ${CMAKE_CURRENT_SOURCE_DIR}/HTTP/src
-  ${CMAKE_CURRENT_SOURCE_DIR}/ExpressTypes
-  ${CMAKE_CURRENT_SOURCE_DIR}/ExpressParser
+add_executable(expresso-server ${EXPRESSO_SERVER_SOURCES})
+target_include_directories(expresso-server PRIVATE
+  ${CMAKE_CURRENT_SOURCE_DIR}/expresso-server/src
+  ${CMAKE_CURRENT_SOURCE_DIR}/expresso-types
+  ${CMAKE_CURRENT_SOURCE_DIR}/expresso-parser
 )
-target_link_libraries(http-server PRIVATE Threads::Threads ZLIB::ZLIB)
+target_link_libraries(expresso-server PRIVATE Threads::Threads ZLIB::ZLIB)
 
-# Option: build with Express parser connected
-option(USE_EXPRESS_PARSER "Link HTTP server with Express parser" ON)
+# Option: build with Expresso parser connected
+option(USE_EXPRESS_PARSER "Link Expresso server with parser" ON)
 if(USE_EXPRESS_PARSER)
-  target_sources(http-server PRIVATE HTTP/src/express/express_bridge.cpp)
-  target_compile_definitions(http-server PRIVATE USE_EXPRESS_PARSER)
-  target_link_libraries(http-server PRIVATE express_parser)
-  target_include_directories(http-server PRIVATE ${CMAKE_CURRENT_SOURCE_DIR})
+  target_sources(expresso-server PRIVATE expresso-server/src/express/express_bridge.cpp)
+  target_compile_definitions(expresso-server PRIVATE USE_EXPRESS_PARSER)
+  target_link_libraries(expresso-server PRIVATE expresso_parser)
+  target_include_directories(expresso-server PRIVATE ${CMAKE_CURRENT_SOURCE_DIR})
 endif()
 
 set(THREADS_PREFER_PTHREAD_FLAG ON)
