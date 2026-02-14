@@ -196,3 +196,17 @@ bool read_http_request(const int& client_fd, char*& out, size_t& out_len) {
   std::free(data);
   return false;
 }
+std::string extract_route(const char* buf, const size_t buf_len) {
+  std::string answer = "";
+  for (size_t i = 0; i < buf_len; ++ i) {
+    if (buf[i] == '/') {
+      while (i < buf_len && buf[i] != ' ') {
+        answer += buf[i];
+        ++ i;
+      }
+      break;
+    }
+  }
+  
+  return answer;
+}
