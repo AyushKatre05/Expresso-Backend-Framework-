@@ -1,6 +1,6 @@
 #include "ExpressRequests.h"
 
-#include "../ExpressTypes/ExpressHttp.h"
+#include "../expresso-types/ExpressHttp.h"
 
 #include <arpa/inet.h>
 #include <ctype.h>

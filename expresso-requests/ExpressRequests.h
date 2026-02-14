@@ -1,7 +1,7 @@
 #pragma once
 
-#include "../ExpressTypes/ExpressHttp.h"
-#include "../ExpressTypes/error.h"
+#include "../expresso-types/ExpressHttp.h"
+#include "../expresso-types/error.h"
 
 ExpressResponse send_req(ExpressRequest* req);
 

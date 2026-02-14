@@ -1,6 +1,6 @@
 cmake_minimum_required(VERSION 3.13)
 
-project(http-server-starter-cpp)
+project(expresso-server LANGUAGES CXX)
 
 file(GLOB_RECURSE SOURCE_FILES src/*.cpp src/*.hpp)
 # Express bridge only used when building from repo root with USE_EXPRESS_PARSER
@@ -12,7 +12,7 @@ set(THREADS_PREFER_PTHREAD_FLAG ON)
 find_package(Threads REQUIRED)
 find_package(ZLIB REQUIRED)
 
-add_executable(http-server ${SOURCE_FILES})
-target_include_directories(http-server PRIVATE ${CMAKE_CURRENT_SOURCE_DIR}/src)
+add_executable(expresso-server ${SOURCE_FILES})
+target_include_directories(expresso-server PRIVATE ${CMAKE_CURRENT_SOURCE_DIR}/src)
 
-target_link_libraries(http-server PRIVATE Threads::Threads ZLIB::ZLIB)
+target_link_libraries(expresso-server PRIVATE Threads::Threads ZLIB::ZLIB)
