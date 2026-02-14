@@ -1,7 +1,7 @@
 #ifndef PARSER_H
 #define PARSER_H
-#include "../ExpressTypes/ExpressHttp.h"
-#include "../ExpressTypes/error.h"
+#include "../expresso-types/ExpressHttp.h"
+#include "../expresso-types/error.h"
 
 #define PARSE_FAIL(req, status)                                                \
   do {                                                                         \
