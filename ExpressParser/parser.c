@@ -141,3 +141,22 @@ ExpressStatus parse_request_params(const char *url, const size_t len,
   free(params);
   return EXPRESS_OK;
 }
+ExpressStatus print_req(ExpressRequest *req) {
+  printf("Method: %s\n", req->method);
+  printf("URL: %s\n", req->url);
+  printf("HTTP Version: %s\n", req->httpVersion);
+  printf("Headers:\n");
+  ExpressHeader *header = req->headers;
+  while (header) {
+    printf("  %s: %s\n", header->key, header->value);
+    header = header->next;
+  }
+  printf("Params:\n");
+  Params *param = req->param;
+  while (param) {
+    printf("  %s: %s\n", param->key, param->value);
+    param = param->next;
+  }
+  printf("Body: %s\n", req->body);
+  return EXPRESS_OK;
+}
