@@ -1,0 +1,242 @@
+/* Expresso Documentation - Warm, readable theme */
+:root {
+  --bg: #faf8f5;
+  --surface: #ffffff;
+  --text: #2c2825;
+  --text-muted: #6b6560;
+  --accent: #c45c26;
+  --accent-soft: #e8d5cc;
+  --border: #e5e0db;
+  --code-bg: #f0ebe6;
+  --sidebar-bg: #2c2825;
+  --sidebar-text: #e8e4e0;
+  --sidebar-active: #c45c26;
+  --font-sans: "DM Sans", "Segoe UI", system-ui, sans-serif;
+  --font-mono: "JetBrains Mono", "Fira Code", monospace;
+}
+
+* {
+  box-sizing: border-box;
+}
+
+html {
+  scroll-behavior: smooth;
+}
+
+body {
+  margin: 0;
+  font-family: var(--font-sans);
+  font-size: 16px;
+  line-height: 1.65;
+  color: var(--text);
+  background: var(--bg);
+}
+
+/* Layout */
+.docs-layout {
+  display: flex;
+  min-height: 100vh;
+}
+
+.docs-sidebar {
+  width: 280px;
+  min-width: 280px;
+  background: var(--sidebar-bg);
+  color: var(--sidebar-text);
+  padding: 1.5rem 0;
+  position: sticky;
+  top: 0;
+  height: 100vh;
+  overflow-y: auto;
+}
+
+.docs-sidebar .logo {
+  padding: 0 1.5rem 1.25rem;
+  font-weight: 700;
+  font-size: 1.35rem;
+  letter-spacing: 0.02em;
+  border-bottom: 1px solid rgba(255,255,255,0.08);
+  margin-bottom: 1rem;
+}
+
+.docs-sidebar .logo a {
+  color: var(--sidebar-text);
+  text-decoration: none;
+}
+
+.docs-sidebar nav {
+  padding: 0 0.75rem;
+}
+
+.docs-sidebar nav a {
+  display: block;
+  padding: 0.5rem 1rem;
+  color: rgba(255,255,255,0.75);
+  text-decoration: none;
+  font-size: 0.9rem;
+  border-radius: 6px;
+  transition: color 0.15s, background 0.15s;
+}
+
+.docs-sidebar nav a:hover {
+  color: var(--sidebar-text);
+  background: rgba(255,255,255,0.06);
+}
+
+.docs-sidebar nav a.active {
+  color: var(--sidebar-active);
+  background: rgba(196, 92, 38, 0.12);
+}
+
+.docs-sidebar .nav-label {
+  font-size: 0.7rem;
+  text-transform: uppercase;
+  letter-spacing: 0.08em;
+  color: rgba(255,255,255,0.4);
+  padding: 1rem 1rem 0.5rem;
+  margin-top: 0.5rem;
+}
+
+.docs-main {
+  flex: 1;
+  padding: 2.5rem 3rem 4rem;
+  max-width: 820px;
+}
+
+/* Typography */
+.docs-main h1 {
+  font-size: 2rem;
+  font-weight: 700;
+  margin: 0 0 0.5rem;
+  color: var(--text);
+  letter-spacing: -0.02em;
+}
+
+.docs-main h2 {
+  font-size: 1.4rem;
+  font-weight: 600;
+  margin: 2.5rem 0 1rem;
+  padding-bottom: 0.35rem;
+  border-bottom: 1px solid var(--border);
+  color: var(--text);
+}
+
+.docs-main h3 {
+  font-size: 1.1rem;
+  font-weight: 600;
+  margin: 1.5rem 0 0.6rem;
+  color: var(--text);
+}
+
+.docs-main p {
+  margin: 0 0 1rem;
+  color: var(--text);
+}
+
+.docs-main ul, .docs-main ol {
+  margin: 0 0 1rem;
+  padding-left: 1.5rem;
+}
+
+.docs-main li {
+  margin-bottom: 0.35rem;
+}
+
+.docs-main a {
+  color: var(--accent);
+  text-decoration: none;
+}
+
+.docs-main a:hover {
+  text-decoration: underline;
+}
+
+/* Code */
+code, kbd {
+  font-family: var(--font-mono);
+  font-size: 0.88em;
+  background: var(--code-bg);
+  padding: 0.15em 0.4em;
+  border-radius: 4px;
+  color: var(--text);
+}
+
+pre {
+  font-family: var(--font-mono);
+  font-size: 0.85rem;
+  line-height: 1.5;
+  background: var(--code-bg);
+  border: 1px solid var(--border);
+  border-radius: 8px;
+  padding: 1.25rem 1.5rem;
+  overflow-x: auto;
+  margin: 1rem 0;
+}
+
+pre code {
+  background: none;
+  padding: 0;
+}
+
+/* Blocks */
+.block-note {
+  background: var(--accent-soft);
+  border-left: 4px solid var(--accent);
+  padding: 1rem 1.25rem;
+  border-radius: 0 6px 6px 0;
+  margin: 1.25rem 0;
+}
+
+.block-note strong { color: var(--accent); }
+
+.block-diagram {
+  background: var(--surface);
+  border: 1px solid var(--border);
+  border-radius: 8px;
+  padding: 1.25rem 1.5rem;
+  font-family: var(--font-mono);
+  font-size: 0.8rem;
+  line-height: 1.6;
+  overflow-x: auto;
+  margin: 1rem 0;
+  color: var(--text-muted);
+}
+
+table {
+  width: 100%;
+  border-collapse: collapse;
+  margin: 1rem 0;
+  font-size: 0.9rem;
+}
+
+th, td {
+  text-align: left;
+  padding: 0.6rem 0.75rem;
+  border-bottom: 1px solid var(--border);
+}
+
+th {
+  font-weight: 600;
+  background: var(--code-bg);
+  color: var(--text);
+}
+
+tr:hover td { background: rgba(0,0,0,0.02); }
+
+/* Section anchors */
+.section {
+  scroll-margin-top: 1rem;
+}
+
+/* Mobile */
+@media (max-width: 768px) {
+  .docs-layout { flex-direction: column; }
+  .docs-sidebar {
+    width: 100%;
+    height: auto;
+    position: relative;
+    padding: 1rem;
+  }
+  .docs-sidebar nav { display: flex; flex-wrap: wrap; gap: 0.5rem; }
+  .docs-main { padding: 1.5rem 1.25rem 3rem; }
+}
