@@ -72,3 +72,39 @@ ExpressStatus parse_request_line(const char *req_line, const size_t length,
   free(new_line);
   return EXPRESS_OK;
 }
+ExpressStatus parse_headers(const char *headers, const size_t length,
+                            HttpRequest *req) {
+  char *header_str = strndup(headers, length);
+  char *line = strtok(header_str, "\r\n");
+  ExpressHeader *first_header = NULL;
+  ExpressHeader *current_header = NULL;
+
+  while (line) {
+    char *colon = strchr(line, ':');
+    if (colon) {
+      ExpressHeader *new_header = malloc(sizeof(ExpressHeader));
+      *colon = '\0';
+      new_header->key = strdup(line);
+      new_header->value = strdup(colon + 2);
+      new_header->next = NULL;
+
+      if (!first_header) {
+        first_header = new_header;
+        current_header = first_header;
+      } else {
+        current_header->next = new_header;
+        current_header = new_header;
+      }
+    }
+    line = strtok(NULL, "\r\n");
+  }
+
+  req->headers = first_header;
+  free(header_str);
+  return EXPRESS_OK;
+}
+
+ExpressStatus parse_body(const char *body, size_t length, HttpRequest *req) {
+  req->body = strndup(body, length);
+  return EXPRESS_OK;
+}
