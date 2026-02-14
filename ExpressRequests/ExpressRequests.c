@@ -256,3 +256,281 @@ static ExpressStatus parse_headers_block(const char *headers, size_t len, Expres
   *out = head;
   return EXPRESS_OK;
 }
+
+ExpressStatus send_req(ExpressRequest *req, ExpressResponse *res) {
+  ExpressStatus st = init_response_fields(res);
+  if (st != EXPRESS_OK) return st;
+  if (!req) return EXPRESS_PARSE_REQUEST_ERROR;
+
+  res->method = req->method ? strdup(req->method) : NULL;
+  res->url = req->url ? strdup(req->url) : NULL;
+  res->timeout_ms = req->timeout_ms;
+
+  char *host = NULL, *port = NULL, *path = NULL;
+  int u = parse_url_host_port_path(req, &host, &port, &path);
+  if (u == -2) { free_response_fields_local(res); return EXPRESS_PARSE_REQUEST_ERROR; }
+  if (u != 0)  { free_response_fields_local(res); return EXPRESS_PARSE_REQUEST_ERROR; }
+
+  unsigned char outbuf[MAX_BUFFER_SIZE];
+  size_t off = 0;
+
+  const char *method = req->method ? req->method : "GET";
+  const char *httpv  = req->httpVersion ? req->httpVersion : "HTTP/1.1";
+  const char *body   = req->body;
+  size_t body_len = (body && req->bodyLength) ? req->bodyLength :
+                    (body ? strlen(body) : 0);
+
+  int n = snprintf((char *)outbuf + off, MAX_BUFFER_SIZE - off,
+                   "%s %s %s\r\n", method, path, httpv);
+  if (n < 0 || (size_t)n >= MAX_BUFFER_SIZE - off) {
+    free(host); free(port); free(path);
+    free_response_fields_local(res);
+    return EXPRESS_PARSE_REQUEST_ERROR;
+  }
+  off += (size_t)n;
+
+  if (!has_header(req->headers, "Host")) {
+    n = snprintf((char *)outbuf + off, MAX_BUFFER_SIZE - off,
+                 "Host: %s\r\n", host);
+    if (n < 0 || (size_t)n >= MAX_BUFFER_SIZE - off) {
+      free(host); free(port); free(path);
+      free_response_fields_local(res);
+      return EXPRESS_PARSE_REQUEST_ERROR;
+    }
+    off += (size_t)n;
+  }
+
+  for (ExpressHeader *h = req->headers; h; h = h->next) {
+    if (!h->key || !h->value) continue;
+    n = snprintf((char *)outbuf + off, MAX_BUFFER_SIZE - off,
+                 "%s: %s\r\n", h->key, h->value);
+    if (n < 0 || (size_t)n >= MAX_BUFFER_SIZE - off) {
+      free(host); free(port); free(path);
+      free_response_fields_local(res);
+      return EXPRESS_PARSE_REQUEST_ERROR;
+    }
+    off += (size_t)n;
+  }
+
+  if (body && body_len > 0 && !has_header(req->headers, "Content-Length")) {
+    n = snprintf((char *)outbuf + off, MAX_BUFFER_SIZE - off,
+                 "Content-Length: %zu\r\n", body_len);
+    if (n < 0 || (size_t)n >= MAX_BUFFER_SIZE - off) {
+      free(host); free(port); free(path);
+      free_response_fields_local(res);
+      return EXPRESS_PARSE_REQUEST_ERROR;
+    }
+    off += (size_t)n;
+  }
+
+  n = snprintf((char *)outbuf + off, MAX_BUFFER_SIZE - off, "\r\n");
+  if (n < 0 || (size_t)n >= MAX_BUFFER_SIZE - off) {
+    free(host); free(port); free(path);
+    free_response_fields_local(res);
+    return EXPRESS_PARSE_REQUEST_ERROR;
+  }
+  off += (size_t)n;
+
+  if (body && body_len > 0) {
+    if (body_len > MAX_BUFFER_SIZE - off) {
+      free(host); free(port); free(path);
+      free_response_fields_local(res);
+      return EXPRESS_PARSE_REQUEST_ERROR;
+    }
+    memcpy(outbuf + off, body, body_len);
+    off += body_len;
+  }
+
+  struct addrinfo hints;
+  memset(&hints, 0, sizeof(hints));
+  hints.ai_family = AF_UNSPEC;
+  hints.ai_socktype = SOCK_STREAM;
+
+  struct addrinfo *ai = NULL;
+  int gai = getaddrinfo(host, port, &hints, &ai);
+  if (gai != 0) {
+    free(host); free(port); free(path);
+    free_response_fields_local(res);
+    return EXPRESS_PARSE_REQUEST_ERROR;
+  }
+
+  int sockfd = -1;
+  for (struct addrinfo *p = ai; p; p = p->ai_next) {
+    sockfd = socket(p->ai_family, p->ai_socktype, p->ai_protocol);
+    if (sockfd < 0) continue;
+    if (connect(sockfd, p->ai_addr, p->ai_addrlen) == 0) break;
+    close(sockfd);
+    sockfd = -1;
+  }
+  freeaddrinfo(ai);
+
+  if (sockfd < 0) {
+    free(host); free(port); free(path);
+    free_response_fields_local(res);
+    return EXPRESS_PARSE_REQUEST_ERROR;
+  }
+
+  if (send_all(sockfd, outbuf, off) != 0) {
+    close(sockfd);
+    free(host); free(port); free(path);
+    free_response_fields_local(res);
+    return EXPRESS_PARSE_REQUEST_ERROR;
+  }
+
+  size_t rcap = 8192, rlen = 0;
+  unsigned char *rbuf = (unsigned char *)malloc(rcap);
+  if (!rbuf) {
+    close(sockfd);
+    free(host); free(port); free(path);
+    free_response_fields_local(res);
+    return EXPRESS_PARSE_MEM_ERR;
+  }
+
+  for (;;) {
+    if (rlen == rcap) {
+      size_t newcap = rcap * 2;
+      unsigned char *nb = (unsigned char *)realloc(rbuf, newcap);
+      if (!nb) {
+        free(rbuf);
+        close(sockfd);
+        free(host); free(port); free(path);
+        free_response_fields_local(res);
+        return EXPRESS_PARSE_MEM_ERR;
+      }
+      rbuf = nb;
+      rcap = newcap;
+    }
+    ssize_t nr = recv(sockfd, rbuf + rlen, rcap - rlen, 0);
+    if (nr < 0) {
+      if (errno == EINTR) continue;
+      free(rbuf);
+      close(sockfd);
+      free(host); free(port); free(path);
+      free_response_fields_local(res);
+      return EXPRESS_PARSE_REQUEST_ERROR;
+    }
+    if (nr == 0) break;
+    rlen += (size_t)nr;
+  }
+  close(sockfd);
+  free(host); free(port); free(path);
+
+  size_t hdr_end = 0;
+  int found = 0;
+  for (size_t i = 0; i + 3 < rlen; i++) {
+    if (rbuf[i] == '\r' && rbuf[i + 1] == '\n' && rbuf[i + 2] == '\r' && rbuf[i + 3] == '\n') {
+      hdr_end = i + 4;
+      found = 1;
+      break;
+    }
+  }
+  if (!found) {
+    free(rbuf);
+    free_response_fields_local(res);
+    return EXPRESS_PARSE_REQUEST_ERROR;
+  }
+
+  char *hdr_copy = (char *)malloc(hdr_end + 1);
+  if (!hdr_copy) {
+    free(rbuf);
+    free_response_fields_local(res);
+    return EXPRESS_PARSE_MEM_ERR;
+  }
+  memcpy(hdr_copy, rbuf, hdr_end);
+  hdr_copy[hdr_end] = '\0';
+
+  char *line_end = strstr(hdr_copy, "\r\n");
+  if (!line_end) {
+    free(hdr_copy);
+    free(rbuf);
+    free_response_fields_local(res);
+    return EXPRESS_PARSE_REQUEST_ERROR;
+  }
+  *line_end = '\0';
+
+  st = parse_status_line(hdr_copy, &res->statusCode, &res->statusMessage);
+  if (st != EXPRESS_OK) {
+    free(hdr_copy);
+    free(rbuf);
+    free_response_fields_local(res);
+    return st;
+  }
+
+  const char *headers_block = line_end + 2;
+  size_t headers_block_len = (size_t)((hdr_copy + hdr_end) - headers_block);
+  size_t raw_headers_len = hdr_end - ((size_t)(line_end - hdr_copy) + 2);
+
+  st = parse_headers_block(headers_block, raw_headers_len, &res->headers);
+  if (st != EXPRESS_OK) {
+    free(hdr_copy);
+    free(rbuf);
+    free_response_fields_local(res);
+    return st;
+  }
+
+  free(hdr_copy);
+
+  const unsigned char *body_start = rbuf + hdr_end;
+  size_t body_avail = rlen - hdr_end;
+
+  const char *te = find_header_value(res->headers, "Transfer-Encoding");
+  const char *cl = find_header_value(res->headers, "Content-Length");
+
+  if (te && ascii_strcasecmp(te, "chunked") == 0) {
+    unsigned char *decoded = NULL;
+    size_t decoded_len = 0;
+    if (decode_chunked(body_start, body_avail, &decoded, &decoded_len) != 0) {
+      free(rbuf);
+      free_response_fields_local(res);
+      return EXPRESS_PARSE_REQUEST_ERROR;
+    }
+    res->body = (char *)malloc(decoded_len + 1);
+    if (!res->body) {
+      free(decoded);
+      free(rbuf);
+      free_response_fields_local(res);
+      return EXPRESS_PARSE_MEM_ERR;
+    }
+    memcpy(res->body, decoded, decoded_len);
+    res->body[decoded_len] = '\0';
+    res->bodyLength = decoded_len;
+    free(decoded);
+  } else if (cl) {
+    char *endp = NULL;
+    long want = strtol(cl, &endp, 10);
+    if (!endp || (*endp != '\0' && !isspace((unsigned char)*endp)) || want < 0) {
+      free(rbuf);
+      free_response_fields_local(res);
+      return EXPRESS_PARSE_REQUEST_ERROR;
+    }
+    size_t want_sz = (size_t)want;
+    if (want_sz > body_avail) {
+      free(rbuf);
+      free_response_fields_local(res);
+      return EXPRESS_PARSE_REQUEST_ERROR;
+    }
+    res->body = (char *)malloc(want_sz + 1);
+    if (!res->body) {
+      free(rbuf);
+      free_response_fields_local(res);
+      return EXPRESS_PARSE_MEM_ERR;
+    }
+    memcpy(res->body, body_start, want_sz);
+    res->body[want_sz] = '\0';
+    res->bodyLength = want_sz;
+  } else {
+    res->body = (char *)malloc(body_avail + 1);
+    if (!res->body) {
+      free(rbuf);
+      free_response_fields_local(res);
+      return EXPRESS_PARSE_MEM_ERR;
+    }
+    memcpy(res->body, body_start, body_avail);
+    res->body[body_avail] = '\0';
+    res->bodyLength = body_avail;
+  }
+
+  free(rbuf);
+  return EXPRESS_OK;
+}
+
