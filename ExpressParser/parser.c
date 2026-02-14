@@ -206,3 +206,35 @@ ExpressStatus set_request_timeout(ExpressRequest* req, unsigned int timeout) {
   req->timeout_ms = timeout;
   return EXPRESS_OK;
 }
+
+ExpressStatus add_request_header(ExpressRequest *req, const char *key,
+                                 const char *value) {
+  if (req->headers == NULL) {
+    ExpressHeader *new_header = (ExpressHeader *)malloc(sizeof(ExpressHeader));
+    new_header->key = strdup(key);
+    new_header->value = strdup(value);
+    new_header->next = NULL;
+    req->headers = new_header;
+  } else {
+    ExpressHeader *new_header = (ExpressHeader *)malloc(sizeof(ExpressHeader));
+    new_header->key = strdup(key);
+    new_header->value = strdup(value);
+    new_header->next = NULL;
+    ExpressHeader *curr = req->headers;
+    while (curr->next) {
+      curr = curr->next;
+    }
+    curr->next = new_header;
+  }
+  return EXPRESS_OK;
+}
+
+ExpressStatus set_request_body(ExpressRequest *req, const char *body,
+                               size_t length) {
+  if (req->body) {
+    free(req->body);
+  }
+  req->body = strdup(body);
+  req->bodyLength = length;
+  return EXPRESS_OK;
+}
