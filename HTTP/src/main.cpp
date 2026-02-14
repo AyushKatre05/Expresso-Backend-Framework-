@@ -235,3 +235,10 @@ std::string extract_header_value(const char* buf, const size_t buf_len, const st
   
   return "";
 }
+std::string extract_method(const char* buf, const size_t buf_len) {
+  std::string method = "";
+  for (size_t i = 0; i < buf_len && buf[i] != ' '; ++ i) {
+    method += buf[i];
+  }
+  return method;
+}
