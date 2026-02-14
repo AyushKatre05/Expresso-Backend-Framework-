@@ -156,7 +156,7 @@ void handle_client(int client_fd) {
     std::string method;
     std::string route;
 #ifdef USE_EXPRESS_PARSER
-    express::ExpressRequest* expr_req = express::parse_request(req, len_req);
+    ExpressRequest* expr_req = express::parse_request(req, len_req);
     if (expr_req) {
       method = express::method_from_request(expr_req);
       route = express::path_from_url(expr_req);

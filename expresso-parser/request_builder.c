@@ -2,6 +2,7 @@
 #include "../expresso-types/error.h"
 #include "parser.h"
 #include <ctype.h>
+#include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
 
