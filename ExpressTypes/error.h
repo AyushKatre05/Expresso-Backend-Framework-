@@ -1,0 +1,11 @@
+#include <stdint.h>
+
+typedef int8_t ExpressStatus;
+
+#define EXPRESS_OK 0
+#define EXPRESS_PARSE_REQUEST_ERROR -10
+#define EXPRESS_PARSE_RESPONSE_ERROR -11
+#define EXPRESS_PARSE_INVALID_HTTP -12
+#define EXPRESS_PARSE_INVALID_METHOD -13
+#define EXPRESS_PARSE_MEM_ERR -14
+#define EXPRESS_PARSE_NOPARAMS 10
