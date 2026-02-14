@@ -160,3 +160,19 @@ ExpressStatus print_req(ExpressRequest *req) {
   printf("Body: %s\n", req->body);
   return EXPRESS_OK;
 }
+
+ExpressStatus init_request(ExpressRequest **req) {
+  *req = calloc(1, sizeof(ExpressRequest));
+  if (!*req)
+    return EXPRESS_PARSE_MEM_ERR;
+  ExpressRequest *temp = *req;
+  temp->method = NULL;
+  temp->url = NULL;
+  temp->httpVersion = NULL;
+  temp->headers = NULL;
+  temp->body = NULL;
+  temp->bodyLength = 0;
+  temp->timeout_ms = 0;
+  temp->param = NULL;
+  return EXPRESS_OK;
+}
