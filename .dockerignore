@@ -1,0 +1,12 @@
+.git
+.gitignore
+*.md
+.vscode
+build
+**/build
+**/*.o
+**/*.a
+**/.DS_Store
+docker-compose*.yml
+Dockerfile*
+nginx
