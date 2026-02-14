@@ -280,3 +280,90 @@ bool should_close_connection(const char* req, const size_t req_len) {
   std::string connection = extract_header_value(req, req_len, "Connection");
   return connection.find("close") != std::string::npos;
 }
+void get_endpoint(const int& client_fd, const char* req, const size_t& req_len) {
+  std::string route = extract_route(req, req_len);
+  bool close_requested = should_close_connection(req, req_len);
+
+  // std::cerr << route << "\n";
+  if (route == "/") {
+    if (close_requested) {
+      std::string response = "HTTP/1.1 200 OK\r\nConnection: close\r\n\r\n";
+      send_http_response(client_fd, response);
+    } else {
+      send_http_response(client_fd, RESP_200, RESP_200_LEN);
+    }
+    return;
+  }
+
+  if (route.size() > 6  && route.substr(0, 6) == "/echo/") {
+    std::string response_body = route.substr(6, std::string::npos);
+    
+    std::string response = "HTTP/1.1 200 OK\r\nContent-Type: text/plain\r\n";
+    
+    bool use_gzip = supports_gzip(req, req_len);
+    
+    if (use_gzip) {
+      response += "Content-Encoding: gzip\r\n";
+      response_body = gzip_compress(response_body);
+    }
+    
+    if (close_requested) {
+      response += "Connection: close\r\n";
+    }
+    
+    response += "Content-Length: " + std::to_string(response_body.size()) + "\r\n\r\n" + response_body;
+    
+    send_http_response(client_fd, response);
+    return;
+  }
+
+  if (route == "/user-agent") {
+    std::string user_agent = extract_header_value(req, req_len, "User-Agent");
+    std::string response = "HTTP/1.1 200 OK\r\nContent-Type: text/plain\r\n";
+    
+    if (close_requested) {
+      response += "Connection: close\r\n";
+    }
+    
+    response += "Content-Length: " + std::to_string(user_agent.size()) + "\r\n\r\n" + user_agent;
+    send_http_response(client_fd, response);
+    return;
+  }
+
+  if (route.size() > 7 && route.substr(0, 7) == "/files/") {
+    std::string filename = route.substr(7);
+    std::string filepath = g_directory + "/" + filename;
+
+    std::string file_contents = read_file(filepath);
+
+    if (file_contents.empty()) {
+      std::ifstream check (filepath);
+      if (!check) {
+        if (close_requested) {
+          std::string response = "HTTP/1.1 404 Not Found\r\nConnection: close\r\n\r\n";
+          send_http_response(client_fd, response);
+        } else {
+          send_http_response(client_fd, RESP_404, RESP_404_LEN);
+        }
+        return;
+      }
+    }
+
+    std::string response = "HTTP/1.1 200 OK\r\nContent-Type: application/octet-stream\r\n";
+    
+    if (close_requested) {
+      response += "Connection: close\r\n";
+    }
+    
+    response += "Content-Length: " + std::to_string(file_contents.size()) + "\r\n\r\n" + file_contents;
+    send_http_response(client_fd, response); 
+    return;
+  }
+
+  if (close_requested) {
+    std::string response = "HTTP/1.1 404 Not Found\r\nConnection: close\r\n\r\n";
+    send_http_response(client_fd, response);
+  } else {
+    send_http_response(client_fd, RESP_404, RESP_404_LEN);
+  }
+}
