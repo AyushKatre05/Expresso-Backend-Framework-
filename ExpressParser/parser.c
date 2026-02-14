@@ -108,3 +108,36 @@ ExpressStatus parse_body(const char *body, size_t length, HttpRequest *req) {
   req->body = strndup(body, length);
   return EXPRESS_OK;
 }
+
+ExpressStatus parse_request_params(const char *url, const size_t len,
+                                   ExpressRequest *req) {
+  const char *paramloc = strchr(url, '?');
+  if (paramloc == NULL)
+    return EXPRESS_PARSE_NOPARAMS;
+  char *params = strdup(paramloc + 1);
+  char *line = strtok(params, "&");
+  Params *current_param = NULL;
+  while (line) {
+    char *equal = strchr(line, '=');
+    if (equal) {
+      Params *new_param = malloc(sizeof(Params));
+      *equal = '\0';
+      new_param->key = strdup(line);
+      new_param->value = strdup(equal + 1);
+      new_param->next = NULL;
+      if (!req->param) {
+        req->param = new_param;
+        current_param = req->param;
+      } else {
+        current_param->next = new_param;
+        current_param = new_param;
+      }
+    } else {
+      free(params);
+      free_params(req->param);
+    }
+    line = strtok(NULL, "&");
+  }
+  free(params);
+  return EXPRESS_OK;
+}
