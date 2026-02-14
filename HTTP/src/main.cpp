@@ -367,3 +367,38 @@ void get_endpoint(const int& client_fd, const char* req, const size_t& req_len) 
     send_http_response(client_fd, RESP_404, RESP_404_LEN);
   }
 }
+void post_endpoint(const int& client_fd, const char* req, const size_t& req_len) {
+  std::string route = extract_route(req, req_len);
+  bool close_requested = should_close_connection(req, req_len);
+
+  if (route.size() > 7 && route.substr(0, 7) == "/files/") {
+    std::string filename = route.substr(7);
+    std::string filepath = g_directory + "/" + filename;
+    
+    std::string body = extract_body(req, req_len);
+    
+    if (write_file(filepath, body)) {
+      if (close_requested) {
+        std::string response = "HTTP/1.1 201 Created\r\nConnection: close\r\n\r\n";
+        send_http_response(client_fd, response);
+      } else {
+        send_http_response(client_fd, RESP_201, RESP_201_LEN);
+      }
+    } else {
+      if (close_requested) {
+        std::string response = "HTTP/1.1 404 Not Found\r\nConnection: close\r\n\r\n";
+        send_http_response(client_fd, response);
+      } else {
+        send_http_response(client_fd, RESP_404, RESP_404_LEN);
+      }
+    }
+    return;
+  }
+
+  if (close_requested) {
+    std::string response = "HTTP/1.1 404 Not Found\r\nConnection: close\r\n\r\n";
+    send_http_response(client_fd, response);
+  } else {
+    send_http_response(client_fd, RESP_404, RESP_404_LEN);
+  }
+}
