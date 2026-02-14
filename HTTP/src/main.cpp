@@ -402,3 +402,36 @@ void post_endpoint(const int& client_fd, const char* req, const size_t& req_len)
     send_http_response(client_fd, RESP_404, RESP_404_LEN);
   }
 }
+void handle_client(int client_fd) {
+  while(true) {
+    char* req = nullptr;
+    size_t len_req = 0;
+
+    if (!read_http_request(client_fd, req, len_req)) {
+      break; 
+    }
+
+    std::string method = extract_method(req, len_req);
+    bool close_connection = should_close_connection(req, len_req);
+
+    
+    if (method == "GET") {
+      get_endpoint(client_fd, req, len_req);
+    } else if (method == "POST") {
+      post_endpoint(client_fd, req, len_req);
+    } else {   
+      send_http_response(client_fd, RESP_404, RESP_404_LEN);
+    }
+
+    if(req) {
+      std::free(req);
+    }
+
+    if(close_connection) {
+      break; 
+    }
+  }
+  
+  ::close(client_fd);
+  std::cout << "Client disconnected\n";
+}
