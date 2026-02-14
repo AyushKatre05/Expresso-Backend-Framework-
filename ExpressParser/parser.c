@@ -176,3 +176,33 @@ ExpressStatus init_request(ExpressRequest **req) {
   temp->param = NULL;
   return EXPRESS_OK;
 }
+
+
+ExpressStatus set_request_method(ExpressRequest *req, const char *method) {
+  if (!is_valid_method(method))
+    return EXPRESS_PARSE_INVALID_METHOD;
+  if (req->method)
+    free(req->method);
+  req->method = strdup(method);
+  return EXPRESS_OK;
+}
+
+ExpressStatus set_request_url(ExpressRequest *req, const char *url) {
+  if (req->url)
+    free(req->url);
+  req->url = strdup(url);
+  return EXPRESS_OK;
+}
+
+ExpressStatus set_request_http_version(ExpressRequest *req,
+                                       const char *httpVersion) {
+  if (req->httpVersion)
+    free(req->httpVersion);
+  req->httpVersion = strdup(httpVersion);
+  return EXPRESS_OK;
+}
+
+ExpressStatus set_request_timeout(ExpressRequest* req, unsigned int timeout) {
+  req->timeout_ms = timeout;
+  return EXPRESS_OK;
+}
