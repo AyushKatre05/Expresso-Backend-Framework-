@@ -5,6 +5,8 @@ use std::thread;
 use std::env;
 
 mod parser;
+mod parser_c;
+mod server_cpp;
 mod handlers;
 // mod threadpool; // Using the crate directly
 

@@ -3,90 +3,35 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Expresso Dashboard</title>
+    <title>Expresso Terminal</title>
     <link rel="stylesheet" href="styles.css">
-    <link rel="preconnect" href="https://fonts.googleapis.com">
-    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;600;700&display=swap" rel="stylesheet">
 </head>
 <body>
+    <div class="overlay"></div>
+    <div class="scanline"></div>
     <div class="container">
-        <header>
-            <div class="logo">
-                <span class="icon">☕</span>
-                <h1>Expresso Framework</h1>
-            </div>
-            <div class="status-badge" id="serverStatus">
-                <span class="dot"></span> Online
-            </div>
-        </header>
-
-        <main>
-            <!-- Hero Section -->
-            <section class="hero">
-                <h2>C++ Backend Framework</h2>
-                <p>High-performance, custom-built HTTP server with a manual C parser.</p>
-            </section>
-
-            <!-- Features Grid -->
-            <div class="grid">
-                <!-- Echo Tester -->
-                <div class="card">
-                    <h3>📢 Echo Tester</h3>
-                    <p>Test the server's response capability.</p>
-                    <div class="input-group">
-                        <input type="text" id="echoInput" placeholder="Type something..." value="Hello Expresso!">
-                        <button onclick="testEcho()">Send</button>
-                    </div>
-                    <div class="response-box" id="echoOutput">
-                        <span class="placeholder">Response will appear here...</span>
-                    </div>
-                </div>
-
-                <!-- API Info -->
-                <div class="card">
-                    <h3>⚡ Server Info</h3>
-                    <div class="info-item">
-                        <span class="label">User Agent:</span>
-                        <span class="value" id="userAgent">Loading...</span>
-                    </div>
-                    <div class="info-item">
-                        <span class="label">Architecture:</span>
-                        <span class="value">Multi-threaded C++</span>
-                    </div>
-                     <div class="info-item">
-                        <span class="label">Parser:</span>
-                        <span class="value">Custom C (Lexer-free)</span>
-                    </div>
-                </div>
-
-                 <!-- File Manager (Mock) -->
-                 <div class="card">
-                    <h3>📂 File Storage (Demo)</h3>
-                    <p>Simple GET/POST file handling.</p>
-                    <div class="file-test">
-                        <button class="secondary" onclick="checkFile('demo.txt')">Check 'demo.txt'</button>
-                        <div id="fileStatus" class="status-text"></div>
-                    </div>
+        <div class="terminal">
+            <div id="output">
+                <div class="welcome-msg">
+                    <pre>
+  ____                          
+ |  __|__  __ _ __ _ __ ___ ___ ___  ___ 
+ |  _| \ \/ / '_ \| '__/ _ \/ __/ __|/ _ \
+ | |__  >  <| |_) | | |  __/\__ \__ \ (_) |
+ |____|/_/\_\ .__/|_|  \___||___/___/\___/ 
+            |_|                            
+                    </pre>
+                    <p>Expresso Hybrid Framework [Version 1.0.0]</p>
+                    <p>(c) 2026 Expresso Corp. All rights reserved.</p>
+                    <p>Type 'help' for a list of commands.</p>
+                    <br>
                 </div>
             </div>
-
-            <!-- Architecture Diagram -->
-            <section class="diagram-section">
-                <h3>System Architecture</h3>
-                <div class="diagram">
-                    <div class="node client">Client (Browser)</div>
-                    <div class="arrow">HTTP Request</div>
-                    <div class="node nginx">Nginx (Proxy)</div>
-                    <div class="arrow">Forward</div>
-                    <div class="node server">
-                        <div class="title">Expresso Server (C++)</div>
-                        <div class="subnode">IO Loop</div>
-                        <div class="subnode parser">C Parser</div>
-                    </div>
-                </div>
-            </section>
-        </main>
+            <div class="input-line">
+                <span class="prompt">root@expresso:~$</span>
+                <input type="text" id="cmdInput" autofocus autocomplete="off" spellcheck="false">
+            </div>
+        </div>
     </div>
     <script src="app.js"></script>
 </body>

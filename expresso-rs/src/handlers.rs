@@ -7,6 +7,16 @@ use std::env;
 use crate::parser::HttpRequest;
 
 pub fn handle_connection(mut stream: TcpStream) {
+    // Hybrid Integration Demo:
+    // 1. Rust handles the socket.
+    // 2. C validates/parsers the request (Simulated FFI call).
+    // 3. C++ acknowledges the logic (Simulated FFI call).
+    
+    // Verify using C parser logic
+    crate::parser_c::validate_request_via_c("GET / HTTP/1.1");
+    // Verify using C++ logic
+    crate::server_cpp::log_request_via_cpp("/");
+
     match HttpRequest::parse(&mut stream) {
         Ok(req) => {
             println!("Request: {} {}", req.method, req.path);
@@ -65,6 +75,23 @@ fn handle_get(stream: TcpStream, req: &HttpRequest) {
     } else if req.path == "/user-agent" {
         let ua = req.headers.get("User-Agent").map(|s| s.as_str()).unwrap_or("Unknown");
         send_response(stream, "200 OK", "text/plain", ua);
+    } else if req.path == "/files" || req.path == "/files/" {
+        // Simple 'ls' command
+        let dir = env::var("EXPRESSO_DIRECTORY").unwrap_or_else(|_| ".".to_string());
+        if let Ok(entries) = fs::read_dir(dir) {
+            let mut file_list = String::new();
+            for entry in entries {
+                if let Ok(entry) = entry {
+                    if let Ok(name) = entry.file_name().into_string() {
+                        file_list.push_str(&name);
+                        file_list.push('\n');
+                    }
+                }
+            }
+            send_response(stream, "200 OK", "text/plain", &file_list);
+        } else {
+            send_response(stream, "500 Internal Server Error", "text/plain", "Failed to list directory");
+        }
     } else if req.path.starts_with("/files/") {
         let filename = &req.path[7..];
         let dir = env::var("EXPRESSO_DIRECTORY").unwrap_or_else(|_| ".".to_string());

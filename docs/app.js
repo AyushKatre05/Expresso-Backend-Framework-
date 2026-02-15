@@ -1,58 +1,115 @@
-document.addEventListener('DOMContentLoaded', () => {
-    // 1. Fetch User Agent to prove server interaction
-    fetch('/user-agent')
-        .then(res => res.text())
-        .then(text => {
-            const el = document.getElementById('userAgent');
-            // Clean up the header string if it contains "User-Agent: "
-            el.textContent = text.replace('User-Agent:', '').trim();
-        })
-        .catch(err => {
-            document.getElementById('userAgent').textContent = 'Error connecting';
-            document.getElementById('serverStatus').innerHTML = '<span class="dot" style="background:red;box-shadow:0 0 8px red"></span> Offline';
-            document.getElementById('serverStatus').style.color = '#ef4444';
-            document.getElementById('serverStatus').style.background = 'rgba(239, 68, 68, 0.1)';
-        });
+const output = document.getElementById('output');
+const input = document.getElementById('cmdInput');
+const promptStr = 'root@expresso:~$ ';
+
+input.addEventListener('keydown', async (e) => {
+    if (e.key === 'Enter') {
+        const cmd = input.value.trim();
+        if (cmd) {
+            printLine(promptStr + cmd, 'command-echo');
+            await processCommand(cmd);
+        }
+        input.value = '';
+        window.scrollTo(0, document.body.scrollHeight);
+    }
 });
 
-// 2. Test Echo Endpoint
-function testEcho() {
-    const input = document.getElementById('echoInput').value;
-    const output = document.getElementById('echoOutput');
-    
-    if (!input) return;
+// Focus input on click anywhere
+document.addEventListener('click', () => input.focus());
 
-    output.innerHTML = '<span class="placeholder">Sending...</span>';
-
-    fetch(`/echo/${encodeURIComponent(input)}`)
-        .then(res => {
-            if (!res.ok) throw new Error('Network response was not ok');
-            return res.text();
-        })
-        .then(text => {
-            output.textContent = text;
-        })
-        .catch(err => {
-            output.innerHTML = '<span style="color: #ef4444">Error: Could not reach server.</span>';
-        });
+function printLine(text, className = '') {
+    const div = document.createElement('div');
+    div.className = className || 'command-output';
+    div.textContent = text;
+    output.appendChild(div);
 }
 
-// 3. File Check (Mock/Real)
-function checkFile(filename) {
-    const status = document.getElementById('fileStatus');
-    status.textContent = 'Checking...';
-    
-    fetch(`/files/${filename}`)
-        .then(res => {
-            if (res.status === 200) {
-                status.innerHTML = `<span style="color:var(--success)">Found ${filename}! (200 OK)</span>`;
-            } else if (res.status === 404) {
-                status.innerHTML = `<span style="color:#f59e0b">File not found (404). Try creating it via POST.</span>`;
-            } else {
-                status.textContent = `Status: ${res.status}`;
+async function processCommand(cmdLine) {
+    const args = cmdLine.split(' ');
+    const cmd = args[0].toLowerCase();
+
+    switch (cmd) {
+        case 'help':
+            printLine(`Available commands:
+  status        Show connection status & hybrid engine details
+  ls            List files in the directory
+  cat <file>    Read content of a file
+  post <file> <content>  Create a file with content
+  get <path>    Perform RAW GET request (e.g., get /user-agent)
+  echo <msg>    Test echo API
+  clear         Clear terminal`, 'info');
+            break;
+
+        case 'clear':
+            output.innerHTML = '';
+            break;
+
+        case 'status':
+            try {
+                const res = await fetch('/user-agent');
+                const ua = await res.text();
+                printLine(`[STATUS] Online`, 'success');
+                printLine(`[ENGINE] Hybrid Rust/C/C++ Architecture`, 'info');
+                printLine(`[USER-AGENT] ${ua}`);
+            } catch (e) {
+                printLine(`[ERROR] Connection failed`, 'error');
             }
-        })
-        .catch(err => {
-            status.innerHTML = '<span style="color: #ef4444">Connection Error</span>';
-        });
+            break;
+
+        case 'ls':
+            try {
+                const res = await fetch('/files');
+                if (res.ok) {
+                    const text = await res.text();
+                    printLine(text || '(empty directory)');
+                } else printLine(`Error: ${res.status}`, 'error');
+            } catch(e) { printLine('Network Error', 'error'); }
+            break;
+
+        case 'cat':
+            if (!args[1]) return printLine('Usage: cat <filename>', 'error');
+            try {
+                const res = await fetch(`/files/${args[1]}`);
+                if (res.ok) {
+                    const text = await res.text();
+                    printLine(text);
+                } else printLine(`File not found: ${args[1]}`, 'error');
+            } catch(e) { printLine('Network Error', 'error'); }
+            break;
+
+        case 'post':
+            if (args.length < 3) return printLine('Usage: post <filename> <content...>', 'error');
+            const filename = args[1];
+            const content = args.slice(2).join(' ');
+            try {
+                const res = await fetch(`/files/${filename}`, {
+                    method: 'POST',
+                    body: content
+                });
+                if (res.ok) printLine(`File '${filename}' created successfully.`, 'success');
+                else printLine(`Error: ${res.status}`, 'error');
+            } catch(e) { printLine('Network Error', 'error'); }
+            break;
+
+        case 'get':
+            if (!args[1]) return printLine('Usage: get <path>', 'error');
+            try {
+                const res = await fetch(args[1]);
+                const text = await res.text();
+                printLine(`[${res.status}] ${text}`);
+            } catch(e) { printLine('Network Error', 'error'); }
+            break;
+            
+        case 'echo':
+            const msg = args.slice(1).join(' ');
+            try {
+                const res = await fetch(`/echo/${encodeURIComponent(msg)}`);
+                const text = await res.text();
+                printLine(text);
+            } catch(e) { printLine('Network Error', 'error'); }
+            break;
+
+        default:
+            printLine(`Command not found: ${cmd}. Type 'help'.`, 'error');
+    }
 }
