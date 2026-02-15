@@ -29,6 +29,7 @@ RUN apt-get update && apt-get install -y --no-install-recommends \
 
 WORKDIR /app
 COPY --from=builder /src/build/expresso-server /app/expresso-server
+COPY docs /app/docs
 
 # Default: serve files from /data (override with --directory)
 ENV EXPRESSO_DIRECTORY=/data
@@ -36,4 +37,4 @@ RUN mkdir -p /data
 
 EXPOSE 4221
 
-CMD ["/app/expresso-server", "--directory", "/data"]
+CMD ["/app/expresso-server", "--directory", "/data", "--docs", "/app/docs"]
