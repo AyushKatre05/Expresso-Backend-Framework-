@@ -15,6 +15,7 @@ COPY expresso-server ./expresso-server
 COPY CMakeLists.txt .
 
 WORKDIR /src/build
+RUN find /src -name "express_bridge.hpp"
 RUN cmake .. -DUSE_EXPRESS_PARSER=ON && cmake --build . -j$(nproc)
 
 # Runtime stage
