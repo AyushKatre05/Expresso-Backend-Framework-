@@ -4,7 +4,9 @@ project(expresso-server LANGUAGES CXX)
 
 file(GLOB_RECURSE SOURCE_FILES src/*.cpp src/*.hpp)
 # Express bridge only used when building from repo root with USE_EXPRESS_PARSER
-list(FILTER SOURCE_FILES EXCLUDE REGEX ".*express/express_bridge\\.(cpp|hpp)$")
+if(NOT USE_EXPRESS_PARSER)
+    list(FILTER SOURCE_FILES EXCLUDE REGEX ".*express/express_bridge\\.(cpp|hpp)$")
+endif()
 
 set(CMAKE_CXX_STANDARD 23)
 set(THREADS_PREFER_PTHREAD_FLAG ON)
