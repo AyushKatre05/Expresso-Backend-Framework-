@@ -5,16 +5,35 @@
 // It acts as the entry point to your C++ server logic.
 
 extern "C" {
-    int cpp_process_command(const char* command) {
-        // This code runs inside the C++ Engine!
-        std::cout << "[C++ CORE] Received Command via FFI: " << command << std::endl;
+    const char* cpp_process_command(const char* command) {
+        static char response[256];
         
-        // internal logic simulation
-        if (strcmp(command, "hack") == 0) {
-            std::cout << "[C++ CORE] SECURITY ALERT: Intrusion attempt detected!" << std::endl;
-            return 999; // Special status code
+        // Comprehensive Logic Router
+        if (strcmp(command, "/files") == 0 || strcmp(command, "/files/") == 0) {
+            return "[C++ Engine] Security Audit: Directory listing authorized for ROOT.";
         }
         
-        return 1; // Success
+        if (strstr(command, "hack")) {
+            return "[C++ Engine] ALERT: Intrusion Detection System (IDS) triggered. Session logged.";
+        }
+
+        if (strstr(command, "/mkdir/")) {
+            return "[C++ Engine] FS_MGMT: Requested new inode allocation for directory.";
+        }
+
+        if (strstr(command, "/echo/")) {
+            return "[C++ Engine] COMM_LINK: Validating packet integrity for echo request.";
+        }
+
+        if (strstr(command, "/user-agent")) {
+            return "[C++ Engine] SYSTEM: Metadata extraction authorized.";
+        }
+
+        if (strstr(command, "DELETE")) {
+             return "[C++ Engine] DANGER: Permanent data erasure request intercepted.";
+        }
+
+        snprintf(response, sizeof(response), "[C++ Engine] Audit Log ID #%d: Command '%s' validated.", rand() % 9999, command);
+        return response;
     }
 }

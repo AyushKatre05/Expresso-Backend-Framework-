@@ -3,100 +3,77 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Expresso OS Manual</title>
+    <title>Expresso OS - Manual</title>
     <style>
-        body {
-            background-color: #0a0a0a;
-            color: #00ff41;
-            font-family: 'Courier New', monospace;
-            padding: 2rem;
-            max-width: 800px;
-            margin: 0 auto;
-            line-height: 1.6;
-        }
-        h1, h2 { border-bottom: 1px solid #00ff41; padding-bottom: 0.5rem; }
-        .cmd-block { margin-bottom: 2rem; }
-        .cmd-name { font-weight: bold; color: #bd93f9; font-size: 1.2rem; }
-        .cmd-desc { margin-left: 2rem; color: #e0e0e0; }
-        .architecture { background: rgba(0, 255, 65, 0.05); padding: 1rem; border: 1px solid #00ff41; margin-top: 2rem; }
-        a { color: #bd93f9; text-decoration: none; }
-        a:hover { text-decoration: underline; }
+        body { background: #000; color: #0f0; font-family: 'Courier New', monospace; padding: 40px; line-height: 1.6; }
+        h1 { border-bottom: 2px solid #0f0; padding-bottom: 10px; }
+        h2 { color: #bd93f9; margin-top: 30px; }
+        code { background: #1a1a1a; padding: 2px 5px; color: #ff79c6; }
+        .grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(300px, 1fr)); gap: 20px; }
+        .cmd-box { border: 1px solid #333; padding: 15px; background: #050505; }
+        .cmd-box:hover { border-color: #0f0; }
+        .category { font-weight: bold; color: #50fa7b; text-transform: uppercase; margin-bottom: 10px; display: block; }
     </style>
 </head>
 <body>
-    <h1>Expresso OS v1.0.0 Manual</h1>
-    <p>Welcome to the official documentation for the Expresso Hybrid Framework.</p>
-    <p>Type <code>exit</code> or close this tab to return to the terminal.</p>
+    <h1>EXPRESSO HYBRID OS - OFFICIAL MANUAL</h1>
+    <p>Version 1.0.0 (Rust Kernel / C++ Logic Engine)</p>
 
-    <div class="architecture">
-        <h2>⚡ Hybrid Architecture Overview</h2>
-        <p>Expresso runs on a unique 3-layer engine:</p>
-        <ul>
-            <li><strong>Rust (The Core)</strong>: Handles Networking (TCP), ThreadPool, and Safety.</li>
-            <li><strong>C (The Parser)</strong>: Legacy parsing logic integrated via FFI for raw speed.</li>
-            <li><strong>C++ (The Logic)</strong>: Business logic engine integrated via FFI.</li>
-        </ul>
-    </div>
+    <h2>Architecture Overview</h2>
+    <p>The Expresso Framework utilizes a triple-language hybrid architecture:</p>
+    <ul>
+        <li><strong>Rust</strong>: Manages the TCP Kernel, Thread Pool, and Virtual File System.</li>
+        <li><strong>C++</strong>: Executes the Logic Engine and Request Auditing via FFI.</li>
+        <li><strong>C</strong>: Handles low-level request parsing for maximum speed.</li>
+    </ul>
 
-    <h2>📚 Command Reference</h2>
-
-    <div class="cmd-block">
-        <div class="cmd-name">Core & Navigation</div>
-        <div class="cmd-desc">
+    <h2>Command Reference (50+)</h2>
+    <div class="grid">
+        <div class="cmd-box">
+            <span class="category">Core & Navigation</span>
             <code>ls</code> - List directory contents<br>
             <code>cd &lt;dir&gt;</code> - Change directory<br>
             <code>pwd</code> - Print working directory<br>
             <code>clear</code> - Clear terminal screen<br>
-            <code>history</code> - Show command history<br>
-            <code>exit</code> - Close terminal session (reload)
+            <code>man</code> - Open this manual<br>
+            <code>exit</code> - Logout of session
+        </div>
+        <div class="cmd-box">
+            <span class="category">File Management</span>
+            <code>cat &lt;file&gt;</code> - Display file content<br>
+            <code>nano &lt;file&gt;</code> - Open visual text editor<br>
+            <code>touch &lt;file&gt;</code> - Create/Update file<br>
+            <code>rm &lt;file&gt;</code> - Delete file/dir<br>
+            <code>mkdir &lt;dir&gt;</code> - Create directory<br>
+            <code>cp/mv</code> - Copy/Move files
+        </div>
+        <div class="cmd-box">
+            <span class="category">Network Diagnostics</span>
+            <code>ping &lt;host&gt;</code> - Test connectivity<br>
+            <code>curl/wget</code> - Fetch remote data<br>
+            <code>ifconfig/ip</code> - Network interfaces<br>
+            <code>netstat</code> - Connection stats<br>
+            <code>dig/nslookup</code> - DNS diagnostics
+        </div>
+        <div class="cmd-box">
+            <span class="category">System Utilities</span>
+            <code>status</code> - Hybrid engine health<br>
+            <code>sysinfo</code> - Hardware specs<br>
+            <code>top/ps</code> - Process monitoring<br>
+            <code>df/free</code> - Disk/Memory usage<br>
+            <code>uname</code> - Kernel information
+        </div>
+        <div class="cmd-box">
+            <span class="category">Misc & Fun</span>
+            <code>matrix</code> - Toggle digital rain<br>
+            <code>hack</code> - Brute force simulation<br>
+            <code>cowsay</code> - Talking cow utility<br>
+            <code>fortune</code> - Random wisdom<br>
+            <code>bc</code> - Command line calculator
         </div>
     </div>
 
-    <div class="cmd-block">
-        <div class="cmd-name">File Operations</div>
-        <div class="cmd-desc">
-            <code>cat &lt;file&gt;</code> - Read file content<br>
-            <code>rm &lt;file&gt;</code> - Remove file or directory<br>
-            <code>mkdir &lt;dir&gt;</code> - Create new directory<br>
-            <code>touch &lt;file&gt;</code> - Create empty file<br>
-            <code>cp &lt;src&gt; &lt;dst&gt;</code> - Copy file<br>
-            <code>mv &lt;src&gt; &lt;dst&gt;</code> - Move/Rename file<br>
-            <code>nano &lt;file&gt;</code> - Open simple file editor<br>
-            <code>head &lt;file&gt;</code> - Show first 10 lines<br>
-            <code>tail &lt;file&gt;</code> - Show last 10 lines<br>
-            <code>wc &lt;file&gt;</code> - Word/Line count<br>
-            <code>grep &lt;pattern&gt; &lt;file&gt;</code> - Search text in file
-        </div>
-    </div>
-
-    <div class="cmd-block">
-        <div class="cmd-name">System & Network</div>
-        <div class="cmd-desc">
-            <code>top</code> - Display system processes (Mock)<br>
-            <code>ps</code> - Process status<br>
-            <code>kill &lt;pid&gt;</code> - Kill process<br>
-            <code>status</code> - Show Hybrid Engine status<br>
-            <code>sysinfo</code> - Hardware information<br>
-            <code>ping &lt;host&gt;</code> - Network latency test<br>
-            <code>curl &lt;url&gt;</code> - Transfer data from URL<br>
-            <code>ifconfig</code> - Network interface config
-        </div>
-    </div>
-
-    <div class="cmd-block">
-        <div class="cmd-name">Fun & Misc</div>
-        <div class="cmd-desc">
-            <code>matrix</code> - Toggle rain effect<br>
-            <code>theme &lt;color&gt;</code> - Change UI color (green, amber, blue, red)<br>
-            <code>fortune</code> - Print a random quote<br>
-            <code>cowsay &lt;msg&gt;</code> - Talking cow<br>
-            <code>banner &lt;text&gt;</code> - Large text banner<br>
-            <code>hack</code> - Simulate hacking sequence
-        </div>
-    </div>
-
-    <footer>
-        <p>(c) 2026 Expresso Corp. Built with Rust, C, and C++.</p>
-    </footer>
+    <h2>Security Notice</h2>
+    <p>All commands are audited by the <strong>C++ Engine</strong>. Unauthorized access to system buffers will trigger the IDS (Intrusion Detection System).</p>
 </body>
 </html>
