@@ -15,6 +15,7 @@ find_package(Threads REQUIRED)
 find_package(ZLIB REQUIRED)
 
 add_executable(expresso-server ${SOURCE_FILES})
-target_include_directories(expresso-server PRIVATE ${CMAKE_CURRENT_SOURCE_DIR}/src)
-
+target_include_directories(expresso-server PUBLIC 
+    ${CMAKE_CURRENT_SOURCE_DIR}/src
+)
 target_link_libraries(expresso-server PRIVATE Threads::Threads ZLIB::ZLIB)
