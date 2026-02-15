@@ -22,7 +22,7 @@ add_library(expresso-parser STATIC
     expresso-parser/memory.c
     # parser.c is just a wrapper, we use the split files
 )
-target_include_directories(expresso-parser PUBLIC expresso-parser)
+target_include_directories(expresso-parser PUBLIC ${CMAKE_CURRENT_SOURCE_DIR})
 
 # Build Server
 add_subdirectory(expresso-server)
