@@ -2,6 +2,7 @@
 #include "core/server.hpp"
 #include <iostream>
 #include <string>
+#include <cstdlib>
 
 int main(int argc, char** argv) {
   std::cout << std::unitbuf;
@@ -14,6 +15,12 @@ int main(int argc, char** argv) {
     }
   }
 
+  int port = 4221;
+  const char* env_port = std::getenv("PORT");
+  if (env_port) {
+    port = std::stoi(env_port);
+  }
+
   std::cout << "Logs from your program will appear here!\n";
-  return run_server(4221);
+  return run_server(port);
 }

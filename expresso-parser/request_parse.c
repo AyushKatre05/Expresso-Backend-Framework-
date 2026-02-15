@@ -20,15 +20,16 @@ ExpressStatus is_valid_method(const char *method) {
 ExpressStatus parse_request_line(const char *req_line, const size_t length,
                                  HttpRequest *req) {
   char *new_line = strndup(req_line, length);
-  char *line = strtok(new_line, " ");
+  char *saveptr;
+  char *line = strtok_r(new_line, " ", &saveptr);
   if (strcmp(new_line, line) != 0)
     return EXPRESS_PARSE_REQUEST_ERROR;
   req->method = strdup(line);
-  line = strtok(NULL, " ");
+  line = strtok_r(NULL, " ", &saveptr);
   if (line == NULL)
     return EXPRESS_PARSE_REQUEST_ERROR;
   req->url = strdup(line);
-  line = strtok(NULL, " ");
+  line = strtok_r(NULL, " ", &saveptr);
   if (line == NULL)
     return EXPRESS_PARSE_REQUEST_ERROR;
   req->httpVersion = strdup(line);
@@ -39,7 +40,8 @@ ExpressStatus parse_request_line(const char *req_line, const size_t length,
 ExpressStatus parse_headers(const char *headers, const size_t length,
                             HttpRequest *req) {
   char *header_str = strndup(headers, length);
-  char *line = strtok(header_str, "\r\n");
+  char *saveptr;
+  char *line = strtok_r(header_str, "\r\n", &saveptr);
   ExpressHeader *first_header = NULL;
   ExpressHeader *current_header = NULL;
 
@@ -60,7 +62,7 @@ ExpressStatus parse_headers(const char *headers, const size_t length,
         current_header = new_header;
       }
     }
-    line = strtok(NULL, "\r\n");
+    line = strtok_r(NULL, "\r\n", &saveptr);
   }
 
   req->headers = first_header;
@@ -79,7 +81,8 @@ ExpressStatus parse_request_params(const char *url, const size_t len,
   if (paramloc == NULL)
     return EXPRESS_PARSE_NOPARAMS;
   char *params = strdup(paramloc + 1);
-  char *line = strtok(params, "&");
+  char *saveptr;
+  char *line = strtok_r(params, "&", &saveptr);
   Params *current_param = NULL;
   while (line) {
     char *equal = strchr(line, '=');
@@ -100,7 +103,7 @@ ExpressStatus parse_request_params(const char *url, const size_t len,
       free(params);
       free_params(req->param);
     }
-    line = strtok(NULL, "&");
+    line = strtok_r(NULL, "&", &saveptr);
   }
   free(params);
   return EXPRESS_OK;

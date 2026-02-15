@@ -1,241 +1,93 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-  <meta charset="UTF-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>Expresso — Documentation</title>
-  <link rel="preconnect" href="https://fonts.googleapis.com">
-  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-  <link href="https://fonts.googleapis.com/css2?family=DM+Sans:ital,opsz,wght@0,9..40,400;0,9..40,600;0,9..40,700&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet">
-  <link rel="stylesheet" href="assets/styles.css">
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Expresso Dashboard</title>
+    <link rel="stylesheet" href="styles.css">
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;600;700&display=swap" rel="stylesheet">
 </head>
 <body>
-  <div class="docs-layout">
-    <aside class="docs-sidebar">
-      <div class="logo"><a href="#">Expresso</a></div>
-      <nav>
-        <span class="nav-label">Guide</span>
-        <a href="#overview" class="active">Overview</a>
-        <a href="#how-it-works">How It Works</a>
-        <a href="#express-style">Use Like Express</a>
-        <a href="#api">API Reference</a>
-        <span class="nav-label">Extend</span>
-        <a href="#roadmap">Roadmap &amp; Additions</a>
-      </nav>
-    </aside>
-    <main class="docs-main">
-      <h1>Expresso Documentation</h1>
-      <p>A minimal HTTP backend with an Express-style request/response model. C++ server, C parser, optional Nginx in front.</p>
+    <div class="container">
+        <header>
+            <div class="logo">
+                <span class="icon">☕</span>
+                <h1>Expresso Framework</h1>
+            </div>
+            <div class="status-badge" id="serverStatus">
+                <span class="dot"></span> Online
+            </div>
+        </header>
 
-      <!-- OVERVIEW -->
-      <section id="overview" class="section">
-        <h2>Overview</h2>
-        <p>Expresso is a loosely coupled framework with three main parts:</p>
-        <ul>
-          <li><strong>expresso-server</strong> — C++ HTTP server (socket accept, read request, route, send response).</li>
-          <li><strong>expresso-parser</strong> — C library that parses raw HTTP into <code>ExpressRequest</code> (method, url, headers, body).</li>
-          <li><strong>expresso-types</strong> — Shared C types (<code>ExpressRequest</code>, <code>ExpressResponse</code>, headers).</li>
-        </ul>
-        <p>You can run the server alone or behind Nginx. With Docker, Nginx listens on port 80 and proxies to the server on 4221.</p>
+        <main>
+            <!-- Hero Section -->
+            <section class="hero">
+                <h2>C++ Backend Framework</h2>
+                <p>High-performance, custom-built HTTP server with a manual C parser.</p>
+            </section>
 
-        <h3>Quick start</h3>
-        <pre><code># With Docker (Nginx + server)
-docker compose up --build
+            <!-- Features Grid -->
+            <div class="grid">
+                <!-- Echo Tester -->
+                <div class="card">
+                    <h3>📢 Echo Tester</h3>
+                    <p>Test the server's response capability.</p>
+                    <div class="input-group">
+                        <input type="text" id="echoInput" placeholder="Type something..." value="Hello Expresso!">
+                        <button onclick="testEcho()">Send</button>
+                    </div>
+                    <div class="response-box" id="echoOutput">
+                        <span class="placeholder">Response will appear here...</span>
+                    </div>
+                </div>
 
-# Then open http://localhost/</code></pre>
-        <pre><code># Local (from repo root)
-mkdir build && cd build
-cmake .. -DUSE_EXPRESS_PARSER=ON
-cmake --build .
-./expresso-server --directory ./data</code></pre>
-      </section>
+                <!-- API Info -->
+                <div class="card">
+                    <h3>⚡ Server Info</h3>
+                    <div class="info-item">
+                        <span class="label">User Agent:</span>
+                        <span class="value" id="userAgent">Loading...</span>
+                    </div>
+                    <div class="info-item">
+                        <span class="label">Architecture:</span>
+                        <span class="value">Multi-threaded C++</span>
+                    </div>
+                     <div class="info-item">
+                        <span class="label">Parser:</span>
+                        <span class="value">Custom C (Lexer-free)</span>
+                    </div>
+                </div>
 
-      <!-- HOW IT WORKS -->
-      <section id="how-it-works" class="section">
-        <h2>How It Works (Behind the Scenes)</h2>
+                 <!-- File Manager (Mock) -->
+                 <div class="card">
+                    <h3>📂 File Storage (Demo)</h3>
+                    <p>Simple GET/POST file handling.</p>
+                    <div class="file-test">
+                        <button class="secondary" onclick="checkFile('demo.txt')">Check 'demo.txt'</button>
+                        <div id="fileStatus" class="status-text"></div>
+                    </div>
+                </div>
+            </div>
 
-        <h3>Request flow</h3>
-        <p>When a request hits Expresso, this is what happens step by step:</p>
-        <div class="block-diagram"><pre>Client
-  │
-  │  HTTP (e.g. GET /echo/hello)
-  ▼
-┌─────────────┐     (optional)      ┌──────────────────┐
-│   Nginx     │  proxy_pass :80     │ expresso-server   │
-│  (port 80)  │ ─────────────────► │   (port 4221)     │
-└─────────────┘                     └────────┬─────────┘
-                                              │
-                    ┌─────────────────────────┼─────────────────────────┐
-                    │                         │                         │
-                    ▼                         ▼                         ▼
-             ┌─────────────┐          ┌─────────────┐          ┌─────────────┐
-             │  accept()   │          │ read_request│          │  dispatch    │
-             │  new client │          │ raw bytes   │          │  by method   │
-             │  thread     │          │ from socket│          │  + route     │
-             └─────────────┘          └──────┬──────┘          └──────┬──────┘
-                                             │                        │
-                                    (optional)│                        │
-                                             ▼                        ▼
-                                    ┌─────────────────┐       ┌───────────────┐
-                                    │ expresso-parser │       │ handle_get /  │
-                                    │ parse_http_     │       │ handle_post   │
-                                    │ request()       │       │ (route match) │
-                                    └─────────────────┘       └───────┬───────┘
-                                             │                        │
-                                             │  method, path          │ build
-                                             └────────────┬───────────┘ response
-                                                          │
-                                                          ▼
-                                               ┌─────────────────────┐
-                                               │ send_response()     │
-                                               │ back to client      │
-                                               └─────────────────────┘</pre></div>
-
-        <h3>Components in code</h3>
-        <ul>
-          <li><strong>main.cpp</strong> — Parses <code>--directory</code>, calls <code>run_server(4221)</code>.</li>
-          <li><strong>server.cpp</strong> — Creates TCP socket, bind/listen on 4221, <code>accept()</code> in a loop; each client runs in a detached thread via <code>handle_client(client_fd)</code>.</li>
-          <li><strong>request_reader.cpp</strong> — <code>read_request(client_fd, out, out_len)</code>: <code>recv()</code> until full HTTP message (headers + body by Content-Length), returns raw buffer.</li>
-          <li><strong>handlers.cpp</strong> — <code>handle_client</code> reads once per request; optionally uses <code>express::parse_request()</code> to get method/path from the C parser; then calls <code>handle_get</code> or <code>handle_post</code> with <code>(client_fd, route, req, req_len)</code>. Handlers use <code>extract_route</code>, <code>extract_header_value</code>, <code>extract_body</code> (or the parsed <code>ExpressRequest</code>) and build response strings; <code>send_response(client_fd, ...)</code> sends them.</li>
-          <li><strong>express_bridge.cpp</strong> — C++ wrapper: <code>parse_request(raw, len)</code> calls C <code>init_request</code> + <code>parse_http_request</code>, returns <code>ExpressRequest*</code>; <code>path_from_url</code>, <code>method_from_request</code> for routing.</li>
-        </ul>
-
-        <h3>Data flow</h3>
-        <p>Raw bytes from the socket are either:</p>
-        <ul>
-          <li>Parsed by the C parser into <code>ExpressRequest</code> (method, url, headers, body) and used for routing only, while handlers still receive the raw buffer for headers/body, or</li>
-          <li>Used directly: <code>request_utils</code> extract method, route, headers, body from the raw buffer. Response is built as an HTTP string and sent with <code>send_response</code>.</li>
-        </ul>
-      </section>
-
-      <!-- EXPRESS-STYLE -->
-      <section id="express-style" class="section">
-        <h2>Using Expresso Like Express</h2>
-        <p>In Express (Node.js) you do <code>app.get('/path', (req, res) => { ... })</code>. In Expresso the idea is the same; the implementation is in C++ and C.</p>
-
-        <h3>Concepts that map</h3>
-        <table>
-          <thead>
-            <tr><th>Express</th><th>Expresso</th></tr>
-          </thead>
-          <tbody>
-            <tr><td><code>app.get('/path', handler)</code></td><td>Add a <code>if (route == "/path") { ... }</code> block in <code>handle_get()</code> in <code>core/handlers.cpp</code>.</td></tr>
-            <tr><td><code>app.post('/path', handler)</code></td><td>Add a <code>if (route == "/path") { ... }</code> block in <code>handle_post()</code>.</td></tr>
-            <tr><td><code>req.method</code></td><td><code>extract_method(req, req_len)</code> or <code>express::method_from_request(expr_req)</code>.</td></tr>
-            <tr><td><code>req.url</code> / path</td><td><code>route</code> passed into handlers, or <code>express::path_from_url(expr_req)</code>.</td></tr>
-            <tr><td><code>req.headers['x-foo']</code></td><td><code>extract_header_value(req, req_len, "X-Foo")</code>.</td></tr>
-            <tr><td><code>req.body</code></td><td><code>extract_body(req, req_len)</code>.</td></tr>
-            <tr><td><code>res.status(200).send(body)</code></td><td>Build a string <code>"HTTP/1.1 200 OK\r\nContent-Type: ...\r\n\r\n" + body</code> and call <code>send_response(client_fd, response)</code>.</td></tr>
-          </tbody>
-        </table>
-
-        <h3>Adding a new GET route</h3>
-        <p>Edit <code>expresso-server/src/core/handlers.cpp</code>, inside <code>handle_get()</code>:</p>
-        <pre><code>if (route == "/my-path") {
-  std::string body = "Hello from Expresso";
-  std::string response = "HTTP/1.1 200 OK\r\nContent-Type: text/plain\r\n";
-  if (close_requested) response += "Connection: close\r\n";
-  response += "Content-Length: " + std::to_string(body.size()) + "\r\n\r\n" + body;
-  send_response(client_fd, response);
-  return;
-}</code></pre>
-
-        <h3>Adding a new POST route</h3>
-        <p>In <code>handle_post()</code>, add a similar <code>if (route == "/my-path")</code> block; use <code>extract_body(req, req_len)</code> for the body and <code>send_response()</code> for the response.</p>
-
-        <div class="block-note"><strong>Tip:</strong> For dynamic segments (e.g. <code>/users/:id</code>), compare <code>route.substr(0, 7) == "/users/"</code> and then take the rest as the id. A future router layer could formalize this.</div>
-      </section>
-
-      <!-- API REFERENCE -->
-      <section id="api" class="section">
-        <h2>API Reference</h2>
-
-        <h3>Command line</h3>
-        <table>
-          <thead>
-            <tr><th>Option</th><th>Description</th></tr>
-          </thead>
-          <tbody>
-            <tr><td><code>--directory &lt;path&gt;</code></td><td>Root directory for <code>/files/</code> (read/write). Default: empty (no files).</td></tr>
-          </tbody>
-        </table>
-
-        <h3>Built-in endpoints</h3>
-        <table>
-          <thead>
-            <tr><th>Method</th><th>Path</th><th>Description</th></tr>
-          </thead>
-          <tbody>
-            <tr><td>GET</td><td><code>/</code></td><td>Returns 200 OK.</td></tr>
-            <tr><td>GET</td><td><code>/echo/&lt;text&gt;</code></td><td>Returns <code>&lt;text&gt;</code>; supports <code>Accept-Encoding: gzip</code>.</td></tr>
-            <tr><td>GET</td><td><code>/user-agent</code></td><td>Returns the request <code>User-Agent</code> header.</td></tr>
-            <tr><td>GET</td><td><code>/files/&lt;name&gt;</code></td><td>Serves file <code>&lt;name&gt;</code> from <code>--directory</code> (404 if missing).</td></tr>
-            <tr><td>POST</td><td><code>/files/&lt;name&gt;</code></td><td>Writes request body to file <code>&lt;name&gt;</code> under <code>--directory</code>; returns 201 Created or 404.</td></tr>
-          </tbody>
-        </table>
-
-        <h3>Types (expresso-types)</h3>
-        <p><code>ExpressRequest</code> (C): <code>method</code>, <code>url</code>, <code>httpVersion</code>, <code>headers</code> (linked list), <code>body</code>, <code>bodyLength</code>, <code>param</code> (query params). Used by the parser and the C++ bridge for routing.</p>
-      </section>
-
-      <!-- ROADMAP -->
-      <section id="roadmap" class="section">
-        <h2>Roadmap &amp; Required Additions</h2>
-        <p>To make Expresso feel more like a full framework, these are the most useful additions.</p>
-
-        <h3>Recommended (high value)</h3>
-        <ul>
-          <li><strong>Router / route table</strong> — Register routes (path + method → handler) instead of long <code>if (route == ...)</code> chains. Enables something like <code>app.get("/users/:id", handler)</code> with path params.</li>
-          <li><strong>Middleware</strong> — A chain of functions that run before the route handler (logging, auth, body limit). Each middleware can call <code>next()</code> or send a response and stop.</li>
-          <li><strong>More HTTP methods</strong> — PUT, DELETE, PATCH in the server and dispatch in <code>handle_client</code> to <code>handle_put</code>, etc.</li>
-          <li><strong>Static file serving</strong> — Serve a directory (e.g. <code>/docs</code> → <code>./docs</code>) with correct Content-Type and caching headers.</li>
-          <li><strong>Config / environment</strong> — Port, directory, and feature flags from env vars or a config file (e.g. <code>EXPRESSO_PORT</code>, <code>EXPRESSO_DIRECTORY</code>).</li>
-          <li><strong>Structured logging</strong> — Request method, path, status, duration; optional log levels and output format (JSON for production).</li>
-        </ul>
-
-        <h3>Important for production</h3>
-        <ul>
-          <li><strong>Health endpoint</strong> — <code>GET /health</code> or <code>GET /ready</code> returning 200 for load balancers and Docker/Kubernetes.</li>
-          <li><strong>CORS</strong> — Option to add <code>Access-Control-Allow-Origin</code> (and related headers) for browser clients.</li>
-          <li><strong>Request size limit</strong> — Reject bodies larger than a configured max to avoid DoS.</li>
-          <li><strong>Graceful shutdown</strong> — On SIGTERM, stop accepting new connections and drain existing ones before exit.</li>
-        </ul>
-
-        <h3>Nice to have</h3>
-        <ul>
-          <li>Rate limiting (per IP or per key).</li>
-          <li>HTTPS termination (Nginx already supports this; document it).</li>
-          <li>Request ID (e.g. <code>X-Request-ID</code>) for tracing.</li>
-          <li>JSON helpers (parse JSON body, send JSON response with correct Content-Type).</li>
-        </ul>
-      </section>
-    </main>
-  </div>
-  <script>
-    (function() {
-      var links = document.querySelectorAll('.docs-sidebar nav a[href^="#"]');
-      function setActive() {
-        var top = window.scrollY + 80;
-        var current = '';
-        document.querySelectorAll('.section').forEach(function(s) {
-          if (s.offsetTop <= top) current = '#' + s.id;
-        });
-        links.forEach(function(a) {
-          a.classList.toggle('active', a.getAttribute('href') === current);
-        });
-      }
-      window.addEventListener('scroll', setActive);
-      window.addEventListener('load', setActive);
-      links.forEach(function(a) {
-        a.addEventListener('click', function(e) {
-          var id = this.getAttribute('href').slice(1);
-          if (id && document.getElementById(id)) {
-            e.preventDefault();
-            document.getElementById(id).scrollIntoView({ behavior: 'smooth' });
-          }
-        });
-      });
-    })();
-  </script>
+            <!-- Architecture Diagram -->
+            <section class="diagram-section">
+                <h3>System Architecture</h3>
+                <div class="diagram">
+                    <div class="node client">Client (Browser)</div>
+                    <div class="arrow">HTTP Request</div>
+                    <div class="node nginx">Nginx (Proxy)</div>
+                    <div class="arrow">Forward</div>
+                    <div class="node server">
+                        <div class="title">Expresso Server (C++)</div>
+                        <div class="subnode">IO Loop</div>
+                        <div class="subnode parser">C Parser</div>
+                    </div>
+                </div>
+            </section>
+        </main>
+    </div>
+    <script src="app.js"></script>
 </body>
 </html>

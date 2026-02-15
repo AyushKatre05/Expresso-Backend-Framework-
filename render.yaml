@@ -1,0 +1,11 @@
+services:
+  - type: web
+    name: expresso-server
+    env: docker
+    plan: free
+    region: singapore
+    buildCommand: docker build -t expresso-server .
+    startCommand: docker run -p 10000:4221 -e PORT=10000 expresso-server
+    envVars:
+      - key: PORT
+        value: 10000
