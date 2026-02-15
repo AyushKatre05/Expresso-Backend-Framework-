@@ -42,9 +42,24 @@ fn send_bytes(mut stream: TcpStream, status: &str, content_type: &str, body: &[u
 }
 
 fn handle_get(stream: TcpStream, req: &HttpRequest) {
-    if req.path == "/" {
-        send_response(stream, "200 OK", "text/plain", "Welcome to Expresso (Rust)!");
-    } else if req.path.starts_with("/echo/") {
+    // 1. Serve Dashboard on Root
+    if req.path == "/" || req.path == "/index.html" {
+        serve_static_file(stream, "docs/index.html", "text/html");
+        return;
+    }
+
+    // 2. Serve Static Assets (CSS, JS from docs/)
+    if req.path == "/styles.css" {
+        serve_static_file(stream, "docs/styles.css", "text/css");
+        return;
+    }
+    if req.path == "/app.js" {
+        serve_static_file(stream, "docs/app.js", "application/javascript");
+        return;
+    }
+
+    // 3. API Endpoints
+    if req.path.starts_with("/echo/") {
         let content = &req.path[6..];
         send_response(stream, "200 OK", "text/plain", content);
     } else if req.path == "/user-agent" {
@@ -65,14 +80,6 @@ fn handle_get(stream: TcpStream, req: &HttpRequest) {
             send_response(stream, "404 Not Found", "text/plain", "File not found");
         }
     } else {
-        // Try serving from docs if configured, or 404
-             // For now, simpler handling
-        if req.path == "/docs" || req.path == "/docs/" {
-             // Mock serving index.html if we were fully implementing static files
-             send_response(stream, "200 OK", "text/html", "<h1>Docs</h1>");
-             return;
-        }
-
         send_response(stream, "404 Not Found", "text/plain", "Not Found");
     }
 }
@@ -95,5 +102,15 @@ fn handle_post(stream: TcpStream, req: &HttpRequest) {
         }
     } else {
         send_response(stream, "404 Not Found", "text/plain", "Not Found");
+    }
+}
+
+fn serve_static_file(stream: TcpStream, path: &str, content_type: &str) {
+    if let Ok(contents) = fs::read(path) {
+        send_bytes(stream, "200 OK", content_type, &contents);
+    } else {
+        // Fallback or Error
+        eprintln!("Failed to read static file: {}", path);
+        send_response(stream, "404 Not Found", "text/plain", "404 - File Not Found");
     }
 }
