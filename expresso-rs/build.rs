@@ -10,8 +10,10 @@ fn main() {
         .include("../expresso-types")
         .compile("parser"); // libparser.a
 
-    // 2. Compile C++ Core Logic (if we want to expose it)
-    // For now, let's focus on the C parser integration first to ensure stability,
-    // as C++ classes are harder to expose via FFI without a C-shim.
-    // We will start by proving the C integration works.
+    // 2. Compile C++ Core Logic
+    // We compile the bridge.cpp which exposes the C++ logic to Rust
+    cc::Build::new()
+        .cpp(true) // Enable C++ compilation
+        .file("../expresso-server/src/bridge.cpp")
+        .compile("server_cpp"); // libserver_cpp.a
 }

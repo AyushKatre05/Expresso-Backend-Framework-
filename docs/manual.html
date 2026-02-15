@@ -1,0 +1,102 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Expresso OS Manual</title>
+    <style>
+        body {
+            background-color: #0a0a0a;
+            color: #00ff41;
+            font-family: 'Courier New', monospace;
+            padding: 2rem;
+            max-width: 800px;
+            margin: 0 auto;
+            line-height: 1.6;
+        }
+        h1, h2 { border-bottom: 1px solid #00ff41; padding-bottom: 0.5rem; }
+        .cmd-block { margin-bottom: 2rem; }
+        .cmd-name { font-weight: bold; color: #bd93f9; font-size: 1.2rem; }
+        .cmd-desc { margin-left: 2rem; color: #e0e0e0; }
+        .architecture { background: rgba(0, 255, 65, 0.05); padding: 1rem; border: 1px solid #00ff41; margin-top: 2rem; }
+        a { color: #bd93f9; text-decoration: none; }
+        a:hover { text-decoration: underline; }
+    </style>
+</head>
+<body>
+    <h1>Expresso OS v1.0.0 Manual</h1>
+    <p>Welcome to the official documentation for the Expresso Hybrid Framework.</p>
+    <p>Type <code>exit</code> or close this tab to return to the terminal.</p>
+
+    <div class="architecture">
+        <h2>⚡ Hybrid Architecture Overview</h2>
+        <p>Expresso runs on a unique 3-layer engine:</p>
+        <ul>
+            <li><strong>Rust (The Core)</strong>: Handles Networking (TCP), ThreadPool, and Safety.</li>
+            <li><strong>C (The Parser)</strong>: Legacy parsing logic integrated via FFI for raw speed.</li>
+            <li><strong>C++ (The Logic)</strong>: Business logic engine integrated via FFI.</li>
+        </ul>
+    </div>
+
+    <h2>📚 Command Reference</h2>
+
+    <div class="cmd-block">
+        <div class="cmd-name">Core & Navigation</div>
+        <div class="cmd-desc">
+            <code>ls</code> - List directory contents<br>
+            <code>cd &lt;dir&gt;</code> - Change directory<br>
+            <code>pwd</code> - Print working directory<br>
+            <code>clear</code> - Clear terminal screen<br>
+            <code>history</code> - Show command history<br>
+            <code>exit</code> - Close terminal session (reload)
+        </div>
+    </div>
+
+    <div class="cmd-block">
+        <div class="cmd-name">File Operations</div>
+        <div class="cmd-desc">
+            <code>cat &lt;file&gt;</code> - Read file content<br>
+            <code>rm &lt;file&gt;</code> - Remove file or directory<br>
+            <code>mkdir &lt;dir&gt;</code> - Create new directory<br>
+            <code>touch &lt;file&gt;</code> - Create empty file<br>
+            <code>cp &lt;src&gt; &lt;dst&gt;</code> - Copy file<br>
+            <code>mv &lt;src&gt; &lt;dst&gt;</code> - Move/Rename file<br>
+            <code>nano &lt;file&gt;</code> - Open simple file editor<br>
+            <code>head &lt;file&gt;</code> - Show first 10 lines<br>
+            <code>tail &lt;file&gt;</code> - Show last 10 lines<br>
+            <code>wc &lt;file&gt;</code> - Word/Line count<br>
+            <code>grep &lt;pattern&gt; &lt;file&gt;</code> - Search text in file
+        </div>
+    </div>
+
+    <div class="cmd-block">
+        <div class="cmd-name">System & Network</div>
+        <div class="cmd-desc">
+            <code>top</code> - Display system processes (Mock)<br>
+            <code>ps</code> - Process status<br>
+            <code>kill &lt;pid&gt;</code> - Kill process<br>
+            <code>status</code> - Show Hybrid Engine status<br>
+            <code>sysinfo</code> - Hardware information<br>
+            <code>ping &lt;host&gt;</code> - Network latency test<br>
+            <code>curl &lt;url&gt;</code> - Transfer data from URL<br>
+            <code>ifconfig</code> - Network interface config
+        </div>
+    </div>
+
+    <div class="cmd-block">
+        <div class="cmd-name">Fun & Misc</div>
+        <div class="cmd-desc">
+            <code>matrix</code> - Toggle rain effect<br>
+            <code>theme &lt;color&gt;</code> - Change UI color (green, amber, blue, red)<br>
+            <code>fortune</code> - Print a random quote<br>
+            <code>cowsay &lt;msg&gt;</code> - Talking cow<br>
+            <code>banner &lt;text&gt;</code> - Large text banner<br>
+            <code>hack</code> - Simulate hacking sequence
+        </div>
+    </div>
+
+    <footer>
+        <p>(c) 2026 Expresso Corp. Built with Rust, C, and C++.</p>
+    </footer>
+</body>
+</html>

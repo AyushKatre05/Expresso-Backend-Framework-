@@ -19,6 +19,10 @@ pub fn handle_connection(mut stream: TcpStream) {
 
     match HttpRequest::parse(&mut stream) {
         Ok(req) => {
+            // DEEP C++ INTEGRATION:
+            // Pass the "command" (path) to the C++ engine logic
+            crate::server_cpp::process_command_via_cpp(&req.path);
+
             println!("Request: {} {}", req.method, req.path);
             if req.method == "GET" {
                 handle_get(stream, &req);
