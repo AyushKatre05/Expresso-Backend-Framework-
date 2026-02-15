@@ -16,15 +16,25 @@ COPY CMakeLists.txt .
 
 WORKDIR /src
 RUN mkdir -p build
-RUN g++ -std=c++2b -O2 \
+
+# Debug: Check where express_bridge is
+RUN find . -name express_bridge.hpp
+
+# 1. Compile C Parser (ALLOWING void* conversions by using gcc)
+RUN gcc -c -O2 -I./expresso-parser expresso-parser/*.c
+
+# 2. Compile C++ Server
+# Find all cpp files first to avoid shell globbing issues
+RUN find expresso-server/src -name "*.cpp" > sources_list.txt
+RUN g++ -std=c++2b -O2 -c \
     -I./expresso-server/src \
     -I./expresso-types \
     -I./expresso-parser \
     -DUSE_EXPRESS_PARSER \
-    expresso-server/src/**/*.cpp \
-    expresso-parser/*.c \
-    -o build/expresso-server \
-    -lpthread -lz
+    @sources_list.txt
+
+# 3. Link everything
+RUN g++ *.o -o build/expresso-server -lpthread -lz
 
 # Runtime stage
 FROM ubuntu:22.04
