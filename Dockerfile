@@ -26,12 +26,12 @@ RUN gcc -c -O2 -I./expresso-parser expresso-parser/*.c
 # 2. Compile C++ Server
 # Find all cpp files first to avoid shell globbing issues
 RUN find expresso-server/src -name "*.cpp" > sources_list.txt
-RUN g++ -std=c++2b -O2 -c \
+RUN cat sources_list.txt
+RUN cat sources_list.txt | xargs g++ -std=c++2b -O2 -c \
     -I./expresso-server/src \
     -I./expresso-types \
     -I./expresso-parser \
-    -DUSE_EXPRESS_PARSER \
-    @sources_list.txt
+    -DUSE_EXPRESS_PARSER
 
 # 3. Link everything
 RUN g++ *.o -o build/expresso-server -lpthread -lz
