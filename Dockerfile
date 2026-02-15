@@ -14,9 +14,17 @@ COPY expresso-parser ./expresso-parser
 COPY expresso-server ./expresso-server
 COPY CMakeLists.txt .
 
-WORKDIR /src/build
-RUN find /src -name "express_bridge.hpp"
-RUN cmake .. -DUSE_EXPRESS_PARSER=ON && cmake --build . -j$(nproc)
+WORKDIR /src
+RUN mkdir -p build
+RUN g++ -std=c++2b -O2 \
+    -I./expresso-server/src \
+    -I./expresso-types \
+    -I./expresso-parser \
+    -DUSE_EXPRESS_PARSER \
+    expresso-server/src/**/*.cpp \
+    expresso-parser/*.c \
+    -o build/expresso-server \
+    -lpthread -lz
 
 # Runtime stage
 FROM ubuntu:22.04
