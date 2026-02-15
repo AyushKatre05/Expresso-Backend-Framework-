@@ -1,0 +1,16 @@
+[package]
+name = "expresso"
+version = "0.1.0"
+edition = "2021"
+
+[dependencies]
+# Thread pool for handling multiple connections
+threadpool = "1.8.1"
+# For file compression (optional, equivalent to zlib)
+flate2 = "1.0" 
+
+[profile.release]
+strip = true  # Automatically strip symbols from the binary.
+opt-level = "z"  # Optimize for size.
+lto = true
+codegen-units = 1
