@@ -1,145 +1,71 @@
-# Expresso
+# 🌌 Expresso OS: The Hybrid Backend Framework
 
-Expresso is a loosely coupled HTTP backend with an Express-style request/response parser. It includes a C++ HTTP server, C parser library, and optional Nginx reverse proxy for production-style deployment.
+**Expresso OS** is a high-fidelity, high-performance web server framework built from first principles using a **Triple-Language Hybrid Architecture** (Rust + C++ + C). 
 
-## Folder structure
+Unlike traditional "website servers," Expresso is a systems-programming masterpiece that exposes a full-scale **Linux-like Hacker Terminal** as its primary interface, allowing for deep remote administration and logic auditing in real-time.
 
-```
-Expresso-Backend-Framework-/
-├── CMakeLists.txt              # Top-level build (Expresso server + parser)
-├── Dockerfile                  # Multi-stage build for expresso-server image
-├── docker-compose.yml          # Run Expresso server + Nginx
-├── .dockerignore
-├── README.md
-│
-├── expresso-types/             # Shared C types (headers)
-│   ├── ExpressHttp.h
-│   └── error.h
-│
-├── expresso-parser/            # C HTTP request/response parser
-│   ├── parser.h
-│   ├── parser.c
-│   ├── request_parse.c
-│   ├── request_builder.c
-│   └── memory.c
-│
-├── expresso-requests/          # C HTTP client (send request, parse response)
-│   ├── ExpressRequests.h
-│   └── ExpressRequests.c
-│
-├── expresso-server/            # C++ HTTP server
-│   ├── CMakeLists.txt
-│   ├── vcpkg.json
-│   ├── vcpkg-configuration.json
-│   └── src/
-│       ├── main.cpp
-│       ├── config/
-│       │   ├── config.hpp
-│       │   └── config.cpp
-│       ├── constants/
-│       │   └── http_constants.hpp
-│       ├── io/
-│       │   ├── request_reader.hpp
-│       │   ├── request_reader.cpp
-│       │   ├── response_sender.hpp
-│       │   └── response_sender.cpp
-│       ├── utils/
-│       │   ├── request_utils.hpp
-│       │   ├── request_utils.cpp
-│       │   ├── file_utils.hpp
-│       │   ├── file_utils.cpp
-│       │   ├── compression.hpp
-│       │   └── compression.cpp
-│       ├── core/
-│       │   ├── server.hpp
-│       │   ├── server.cpp
-│       │   ├── handlers.hpp
-│       │   └── handlers.cpp
-│       └── express/
-│           ├── express_bridge.hpp
-│           └── express_bridge.cpp
-│
-└── nginx/                      # Nginx config for Docker
-    └── nginx.conf
-```
+---
 
-## Run with Docker (recommended)
+## 🏛️ Architecture: The Hybrid Triple-Threat
 
-Uses **Nginx** as reverse proxy on port 80; **Expresso server** runs behind it on 4221.
+Expresso leverages the unique strengths of three industry-standard languages:
 
-**Requirements:** Docker and Docker Compose.
+1.  **🦀 Rust (The Kernel):** Manages high-performance networking, thread-pooling, and the Virtual File System (VFS).
+2.  **💎 C++ (The Logic Engine):** Handles the "High Brain" business logic and real-time security auditing via FFI (Foreign Function Interface).
+3.  **🔌 C (The Parser):** Provides ultra-low-latency request parsing for maximum throughput.
+
+---
+
+## 🕶️ The Hacker Terminal UI
+
+Expresso replaces static dashboards with an interactive commands-based interface.
+*   **50+ Commands:** A comprehensive suite of Linux-like utilities including `ls`, `cat`, `nano`, `rm`, `mkdir`, `top`, `ps`, and more.
+*   **Real-Time Auditing:** Every command triggers a blue `[SYSTEM]` audit log directly from the C++ Engine.
+*   **Virtual Navigator:** Support for `cd`, relative paths, and shell-state management.
+*   **Embedded Nano:** A fully functional in-browser text editor for real-time file modification.
+
+---
+
+## 🚀 Getting Started
+
+### 1. Run via Docker (Recommended)
+The project is containerized for instant deployment.
 
 ```bash
-# Build and start (Nginx on port 80, Expresso server behind it)
+# Build and Launch
 docker compose up --build
-
-# Or in background
-docker compose up -d --build
 ```
+Once launched, open **http://localhost:10000** to enter the Expresso Terminal.
 
-- **http://localhost/** — All traffic is proxied to the Expresso server.
-- Files for `/files/` routes are stored in a Docker volume; to add files:
-  - Copy into the volume:  
-    `docker cp ./myfile.txt expresso-server:/data/`
-  - Or mount a host folder in `docker-compose.yml` under `expresso-server`:
-    ```yaml
-    volumes:
-      - ./my-files:/data
-    ```
+### 2. Basic Commands
+*   `help` - List all available commands.
+*   `man` - Open the architectural manual in a new tab.
+*   `status` - Run a deep health check on the Hybrid engine.
+*   `matrix` - Initiate the digital rain hacker visual.
 
-Stop:
+---
 
-```bash
-docker compose down
-```
+## 📖 Endpoints (Legacy Integration)
 
-## Run locally (without Docker)
-
-**Requirements:** CMake 3.13+, C++23 compiler, pthreads, zlib (e.g. `zlib1g-dev` on Debian/Ubuntu). POSIX (Linux, WSL, or macOS).
-
-### From repo root (server + parser)
-
-```bash
-mkdir build && cd build
-cmake .. -DUSE_EXPRESS_PARSER=ON
-cmake --build .
-./expresso-server --directory /path/to/files
-```
-
-Server listens on **port 4221**.
-
-### Expresso server only (no parser)
-
-```bash
-cd expresso-server
-mkdir build && cd build
-cmake ..
-cmake --build .
-./expresso-server [--directory /path/to/files]
-```
-
-## Endpoints
+Expresso still functions as a standard HTTP server for external apps:
 
 | Method | Path | Description |
-|--------|------|-------------|
-| GET | `/` | 200 OK |
-| GET | `/docs` | Documentation UI (if run with `--docs`) |
-| GET | `/echo/<text>` | Returns `<text>`, supports gzip |
-| GET | `/user-agent` | Returns `User-Agent` header |
-| GET | `/files/<name>` | Serves file from `--directory` |
-| POST | `/files/<name>` | Writes body to file under `--directory` |
+| :--- | :--- | :--- |
+| **GET** | `/` | Serves the Hacker Terminal |
+| **GET** | `/files` | Lists directory contents (Secure Audit) |
+| **POST** | `/files/<name>` | Writes raw body to a file |
+| **DELETE** | `/files/<name>` | Deletes a file or directory |
+| **GET** | `/echo/<text>` | Low-latency response check |
 
-## Documentation
+---
 
-The **documentation UI** explains how Expresso works behind the scenes, how to use it like Express, the API, and what to add next.
+## 📂 Project Structure
+*   `expresso-rs/`: The Rust Kernel and FFI bridge.
+*   `expresso-server/`: The C++ Logic Engine.
+*   `expresso-parser/`: The C Request/Response parser.
+*   `docs/`: The frontend Terminal UI and Manual.
 
-- **In the browser (no server):** Open `docs/index.html` in your browser.
-- **Served by Expresso:** Run the server with `--docs` pointing at the `docs` folder:
-  ```bash
-  ./expresso-server --directory ./data --docs ./docs
-  ```
-  Then open **http://localhost:4221/docs** (or http://localhost/docs when behind Nginx in Docker).
+---
 
-## License
-
-See repository.
+## 📜 License
+Distributed under the MIT License. Built with ❤️ for Systems Engineering.
