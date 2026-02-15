@@ -24,6 +24,8 @@ pub fn handle_connection(mut stream: TcpStream) {
                 handle_get(stream, &req);
             } else if req.method == "POST" {
                 handle_post(stream, &req);
+            } else if req.method == "DELETE" {
+                handle_delete(stream, &req);
             } else {
                 send_response(stream, "405 Method Not Allowed", "text/plain", "Method not allowed");
             }
@@ -126,6 +128,44 @@ fn handle_post(stream: TcpStream, req: &HttpRequest) {
             }
         } else {
             send_response(stream, "500 Internal Server Error", "text/plain", "Failed to create file");
+        }
+    } else if req.path.starts_with("/mkdir/") {
+        let dirname = &req.path[7..];
+        let dir = env::var("EXPRESSO_DIRECTORY").unwrap_or_else(|_| ".".to_string());
+        let new_dir_path = Path::new(&dir).join(dirname);
+
+        if fs::create_dir_all(new_dir_path).is_ok() {
+            send_response(stream, "201 Created", "text/plain", "Directory created");
+        } else {
+            send_response(stream, "500 Internal Server Error", "text/plain", "Failed to create directory");
+        }
+    } else {
+        send_response(stream, "404 Not Found", "text/plain", "Not Found");
+    }
+}
+
+fn handle_delete(stream: TcpStream, req: &HttpRequest) {
+    if req.path.starts_with("/files/") {
+        let filename = &req.path[7..];
+        let dir = env::var("EXPRESSO_DIRECTORY").unwrap_or_else(|_| ".".to_string());
+        let filepath = Path::new(&dir).join(filename);
+
+        if filepath.exists() {
+            if filepath.is_dir() {
+                if fs::remove_dir_all(filepath).is_ok() {
+                    send_response(stream, "200 OK", "text/plain", "Directory deleted");
+                } else {
+                    send_response(stream, "500 Internal Server Error", "text/plain", "Failed to delete directory");
+                }
+            } else {
+                if fs::remove_file(filepath).is_ok() {
+                    send_response(stream, "200 OK", "text/plain", "File deleted");
+                } else {
+                    send_response(stream, "500 Internal Server Error", "text/plain", "Failed to delete file");
+                }
+            }
+        } else {
+            send_response(stream, "404 Not Found", "text/plain", "File not found");
         }
     } else {
         send_response(stream, "404 Not Found", "text/plain", "Not Found");
