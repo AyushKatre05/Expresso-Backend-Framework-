@@ -2,6 +2,7 @@
 FROM rust:1.75 as builder
 
 WORKDIR /usr/src/expresso
+COPY expresso-types ../expresso-types
 COPY expresso-parser ../expresso-parser
 COPY expresso-rs .
 RUN cargo build --release

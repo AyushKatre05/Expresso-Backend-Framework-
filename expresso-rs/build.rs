@@ -7,6 +7,7 @@ fn main() {
         .file("../expresso-parser/request_parse.c")
         .file("../expresso-parser/request_builder.c")
         .include("../expresso-parser")
+        .include("../expresso-types")
         .compile("parser"); // libparser.a
 
     // 2. Compile C++ Core Logic (if we want to expose it)
