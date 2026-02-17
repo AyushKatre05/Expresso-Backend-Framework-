@@ -1,71 +1,91 @@
-# 🌌 Expresso OS: The Hybrid Backend Framework
+# Expresso OS: The Hybrid Systems-Kernel & Backend Framework
 
-**Expresso OS** is a high-fidelity, high-performance web server framework built from first principles using a **Triple-Language Hybrid Architecture** (Rust + C++ + C). 
-
-Unlike traditional "website servers," Expresso is a systems-programming masterpiece that exposes a full-scale **Linux-like Hacker Terminal** as its primary interface, allowing for deep remote administration and logic auditing in real-time.
-
----
-
-## 🏛️ Architecture: The Hybrid Triple-Threat
-
-Expresso leverages the unique strengths of three industry-standard languages:
-
-1.  **🦀 Rust (The Kernel):** Manages high-performance networking, thread-pooling, and the Virtual File System (VFS).
-2.  **💎 C++ (The Logic Engine):** Handles the "High Brain" business logic and real-time security auditing via FFI (Foreign Function Interface).
-3.  **🔌 C (The Parser):** Provides ultra-low-latency request parsing for maximum throughput.
+> **A First-Principles Masterpiece in Triple-Language Hybrid Engineering.**
+> Built for High-Performance Networking, Real-Time Auditing, and Zero-Trust Remote Administration.
 
 ---
 
-## 🕶️ The Hacker Terminal UI
+## The Hybrid Architecture: "Triple-Threat" Design
 
-Expresso replaces static dashboards with an interactive commands-based interface.
-*   **50+ Commands:** A comprehensive suite of Linux-like utilities including `ls`, `cat`, `nano`, `rm`, `mkdir`, `top`, `ps`, and more.
-*   **Real-Time Auditing:** Every command triggers a blue `[SYSTEM]` audit log directly from the C++ Engine.
-*   **Virtual Navigator:** Support for `cd`, relative paths, and shell-state management.
-*   **Embedded Nano:** A fully functional in-browser text editor for real-time file modification.
+Expresso OS is not a traditional web server. It is a **Systems Hybrid Engine** that orchestrates three distinct software layers to achieve a balance of safety, performance, and logical complexity.
+
+```mermaid
+graph TD
+    subgraph "The Kernel (Rust)"
+        R1[TCP/TLS Stack]
+        R2[Virtual File System - VFS]
+        R3[Thread Pooling]
+    end
+
+    subgraph "The Logic Engine (C++)"
+        C1[High Brain Logic]
+        C2[Security Audit IDS]
+        C3[Command Processor]
+    end
+
+    subgraph "The Parser (C)"
+        P1[Zero-Copy Parser]
+        P2[Request Integrity]
+    end
+
+    R1 --> P1
+    P1 --> R2
+    R2 <--> C1
+    C1 --> C2
+    C3 --> R1
+```
+
+### 1. The Rust Kernel (Memory Safety)
+Manages the bedrock of the system:
+- **Asynchronous Networking**: High-concurrency socket handling.
+- **VFS (Virtual File System)**: Abstracted file access with granular permissioning.
+- **FFI Bridge**: Orchestrates the interaction between the C Parser and C++ Logic Engine.
+
+### 2. 💎 The C++ Logic Engine (High Brain)
+The "High Brain" of Expresso OS:
+- **Real-Time Security Audit**: Every request is intercepted by the IDS (Intrusion Detection System).
+- **Complex Command Routing**: Handles over 50+ Linux-like administrative commands.
+- **System Memory Management**: Fine-grained control over internal state and performance metrics.
+
+### 3. 🔌 The C Parser (Raw Power)
+The performance bottleneck is eliminated by:
+- **Zero-Copy Parsing**: Direct pointer-based manipulation of request buffers.
+- **Lowest Latency**: Minimal overhead in the critical path of every request.
 
 ---
 
-## 🚀 Getting Started
+## The Terminal Interface
 
-### 1. Run via Docker (Recommended)
-The project is containerized for instant deployment.
+Expresso OS bypasses standard UI paradigms in favor of a **Command-Line Interface (CLI) Terminal**.
 
+### Primary Capabilities:
+- **50+ Integrated Commands**: Native implementations of `ls`, `cat`, `mkdir`, `top`, `ps`, and `nano`.
+- **System Auditing**: Every command execution triggers a blue `[SYSTEM]` audit log from the C++ Logic Engine.
+- **Remote Administration**: Perform deep system checks, file manipulations, and logic auditing from anywhere.
+- **Embedded Editor**: A high-fidelity in-browser `nano` instance for real-time file tree modification.
+
+---
+
+## Rapid Deployment & Integration
+
+Expresso OS is designed for modern containerized environments.
+
+### Container Orchestration
+Launch the full stack including the **Nginx Reverse Proxy**.
 ```bash
-# Build and Launch
 docker compose up --build
 ```
-Once launched, open **http://localhost:10000** to enter the Expresso Terminal.
 
-### 2. Basic Commands
-*   `help` - List all available commands.
-*   `man` - Open the architectural manual in a new tab.
-*   `status` - Run a deep health check on the Hybrid engine.
-*   `matrix` - Initiate the digital rain hacker visual.
+## API & Systems Reference
 
----
-
-## 📖 Endpoints (Legacy Integration)
-
-Expresso still functions as a standard HTTP server for external apps:
-
-| Method | Path | Description |
+| Component | Responsibility | Performance Target |
 | :--- | :--- | :--- |
-| **GET** | `/` | Serves the Hacker Terminal |
-| **GET** | `/files` | Lists directory contents (Secure Audit) |
-| **POST** | `/files/<name>` | Writes raw body to a file |
-| **DELETE** | `/files/<name>` | Deletes a file or directory |
-| **GET** | `/echo/<text>` | Low-latency response check |
+| **Networking** | Rust `std::net` | Sub-millisecond latency |
+| **Parsing** | C Pointer-logic | O(1) Header Access |
+| **Logic** | C++ Logic Engine | Real-time Audit < 10µs |
 
 ---
 
-## 📂 Project Structure
-*   `expresso-rs/`: The Rust Kernel and FFI bridge.
-*   `expresso-server/`: The C++ Logic Engine.
-*   `expresso-parser/`: The C Request/Response parser.
-*   `docs/`: The frontend Terminal UI and Manual.
-
----
-
-## 📜 License
-Distributed under the MIT License. Built with ❤️ for Systems Engineering.
+## Principles
+Built with ❤️ for Systems Engineering and First-Principles Design.  
+Distributed under the **MIT License**.
